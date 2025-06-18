@@ -1,0 +1,452 @@
+    <!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clap Board</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* 클랩 피드 관련 스타일 전부 삭제함 */
+    .right-panel { width: 300px; background: #ffffff; padding: 36px 24px 32px 24px; border-left: 1px solid #f1f3f5; display: flex; flex-direction: column; gap: 32px; }
+    .right-section { display: flex; flex-direction: column; }
+    .right-value { font-size: 20px; font-weight: 800; color: #2563eb; }
+    .right-list { display: flex; flex-direction: column; gap: 4px; }
+    .right-list-item { font-size: 14px; color: #444; }
+    @media (max-width: 900px) { .right-panel { display: none; } }
+    .reward-header { width: 100%; max-width: 100%; margin-left: 0; box-sizing: border-box; }
+    .reward-header-title { font-size: 24px; font-weight: 700; color: #222; margin-bottom: 42px; text-align: left; }
+    .reward-tabs-wrap { position: relative; width: 100%; margin-top: 4px; margin-bottom: 48px; padding-bottom: 6px; }
+    .reward-tabs { display: flex; gap: 32px; align-items: flex-end; position: relative; z-index: 2; padding-bottom: 6px; }
+    .reward-tab { background: none; border: none; font-size: 18px; color: #bbb; font-weight: 600; cursor: pointer; padding: 0 4px 0 0; outline: none; transition: color 0.2s; padding-bottom: 6px; }
+    .reward-tab.active { color: #222; font-weight: 600; }
+    .reward-tabs-active-underline { position: absolute; height: 2px; background: var(--primary-blue, #4f8cff); bottom: -6px; left: 0; z-index: 10; transition: all 0.2s; display: block; }
+    .reward-tabs-underline { width: 100%; height: 2px; background: #F4F4F4; position: absolute; left: 0; bottom: 0; z-index: 1; }
+    :root { --primary-blue: #4f8cff; }
+    .reward-tab.active { color: var(--primary-blue); }
+    .reward-tabs-active-underline { background: var(--primary-blue); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-hamburger material-icons" id="hamburger-menu" style="display:none;">menu</span>
+      <img src="assets/logo.png" alt="CLAP" class="topbar-logo" />
+    </div>
+    <div class="topbar-right">
+        <span class="topbar-icon"><img src="assets/clap.svg" class="clap-svg-icon" alt="박수"></span>
+      <span class="topbar-icon material-icons">school</span>
+
+      <span class="topbar-icon"><span class="material-icons">notifications_none</span></span>
+
+      <div class="topbar-profile">
+        <img class="profile-circle" src="https://i.pravatar.cc/150?img=3" alt="프로필" />
+        <div class="profile-info">
+          <span class="profile-name">지길환</span>
+          <span class="profile-email">willji@gilhwanji.com</span>
+        </div>
+        <span class="material-icons profile-arrow">expand_more</span>
+      </div>
+    </div>
+  </div>
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="menu">
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">emergency</span>
+            신규 기능
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <a class="menu-sub-btn" href="culture.html">클랩 리워드 스토어</a>
+            <a class="menu-sub-btn active" href="clapboard.html">클랩 보드</a>
+            <a class="menu-sub-btn" href="#">인재이탈방지(관리자전용)</a>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">track_changes</span>
+            목표
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub hide">
+            <a class="menu-sub-btn">목표 관리</a>
+            <a class="menu-sub-btn">사이트 운영 관리</a>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">sync_alt</span>
+            1:1
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub hide">
+            <button class="menu-sub-btn">멤버와의 1:1</button>
+            <button class="menu-sub-btn">미팅 관리</button>
+            <button class="menu-sub-btn">나의 1:1</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">thumb_up_off_alt</span>
+            피드백
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub hide">
+            <button class="menu-sub-btn">나의 피드백</button>
+            <button class="menu-sub-btn">피드백 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">edit_note</span>
+            평가
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub hide">
+            <button class="menu-sub-btn">나의 평가</button>
+            <button class="menu-sub-btn">평가 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">insert_photo_outlined</span>
+            성장 대시보드
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub hide">
+            <button class="menu-sub-btn">나의 대시보드</button>
+            <button class="menu-sub-btn">멤버 대시보드</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">groups_2</span>
+            조직도 & 구성원
+          </button>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">tune</span>
+            관리자 설정
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub hide">
+            <button class="menu-sub-btn">권한 설정</button>
+            <button class="menu-sub-btn">구독 관리</button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <main class="clapboard-main">
+      <div class="reward-header">
+        <div class="reward-header-title">내가 받은 클랩</div>
+        <div class="reward-tabs-wrap">
+          <div class="reward-tabs">
+            <button class="reward-tab active" data-tab="received">받은 클랩</button>
+            <button class="reward-tab" data-tab="sent">보낸 클랩</button>
+            <div class="reward-tabs-active-underline"></div>
+          </div>
+          <div class="reward-tabs-underline"></div>
+        </div>
+      </div>
+      <div class="clap-list" data-tab="received">
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/1.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">이수진</span><span class="clap-role">디자인팀 · 시니어</span><span class="clap-time">방금 전</span></div>
+            <div class="clap-message">새로운 아이디어 정말 멋졌어요! 팀에 큰 영감을 주셨어요 🙌</div>
+            <div class="clap-tags-row"><span class="clap-tag">#디자인</span><span class="clap-tag">#혁신</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/2.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">박지훈</span><span class="clap-role">개발팀 · 프론트엔드</span><span class="clap-time">5분 전</span></div>
+            <div class="clap-message">버그 빠르게 잡아줘서 고마워요! 덕분에 일정 맞췄어요.</div>
+            <div class="clap-tags-row"><span class="clap-tag">#개발</span><span class="clap-tag">#문제해결</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/3.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">최민수</span><span class="clap-role">QA · 매니저</span><span class="clap-time">30분 전</span></div>
+            <div class="clap-message">테스트 케이스 꼼꼼하게 챙겨줘서 프로젝트가 한층 안정적이 됐어요.</div>
+            <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#품질</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/4.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">김하늘</span><span class="clap-role">마케팅팀 · 팀장</span><span class="clap-time">1시간 전</span></div>
+            <div class="clap-message">캠페인 결과가 기대 이상이었어요! 정말 수고 많으셨습니다 🎉</div>
+            <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#성과</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/5.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">이정훈</span><span class="clap-role">운영팀 · 주니어</span><span class="clap-time">2시간 전</span></div>
+            <div class="clap-message">긴급 이슈 빠르게 처리해줘서 정말 고마워요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#긴급대응</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/6.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">정유진</span><span class="clap-role">기획팀 · PM</span><span class="clap-time">3시간 전</span></div>
+            <div class="clap-message">새로운 플로우 제안 덕분에 프로젝트가 훨씬 매끄러워졌어요.</div>
+            <div class="clap-tags-row"><span class="clap-tag">#기획</span><span class="clap-tag">#아이디어</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/7.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">한지훈</span><span class="clap-role">개발팀 · 백엔드</span><span class="clap-time">4시간 전</span></div>
+            <div class="clap-message">API 문서화 꼼꼼하게 해줘서 협업이 쉬워졌어요.</div>
+            <div class="clap-tags-row"><span class="clap-tag">#개발</span><span class="clap-tag">#협업</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/8.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">오지은</span><span class="clap-role">QA · 주니어</span><span class="clap-time">5시간 전</span></div>
+            <div class="clap-message">테스트 자동화 도입 제안 정말 좋았어요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#자동화</span></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/9.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">김태현</span><span class="clap-role">운영팀 · 매니저</span><span class="clap-time">6시간 전</span></div>
+            <div class="clap-message">팀 분위기 좋게 만들어줘서 항상 고마워요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#분위기메이커</span></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/10.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">박지수</span><span class="clap-role">마케팅팀 · 주니어</span><span class="clap-time">7시간 전</span></div>
+            <div class="clap-message">SNS 홍보 아이디어 덕분에 팔로워가 확 늘었어요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#SNS</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="clap-list" data-tab="sent" style="display:none;">
+        <div class="clap-item" data-name="이상훈" data-team="개발팀" data-keywords="#리뷰,#개발" data-message="코드 리뷰 꼼꼼하게 해줘서 고마워요!">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/11.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">이상훈</span><span class="clap-role">개발팀 · 시니어</span><span class="clap-time">1일 전</span></div>
+            <div class="clap-message">코드 리뷰 꼼꼼하게 해줘서 고마워요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#개발</span><span class="clap-tag">#리뷰</span></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
+          </div>
+        </div>
+        <div class="clap-item" data-name="최유리" data-team="디자인팀" data-keywords="#디자인,#프로토타입" data-message="프로토타입 빠르게 만들어줘서 일정이 단축됐어요!">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/12.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">최유리</span><span class="clap-role">디자인팀 · 주니어</span><span class="clap-time">1일 전</span></div>
+            <div class="clap-message">프로토타입 빠르게 만들어줘서 일정이 단축됐어요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#디자인</span><span class="clap-tag">#프로토타입</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item" data-name="정재훈" data-team="QA" data-keywords="#QA,#자동화" data-message="테스트 자동화 스크립트 공유해줘서 큰 도움 됐어요.">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/13.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">정재훈</span><span class="clap-role">QA · 시니어</span><span class="clap-time">2일 전</span></div>
+            <div class="clap-message">테스트 자동화 스크립트 공유해줘서 큰 도움 됐어요.</div>
+            <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#자동화</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item" data-name="김지연" data-team="마케팅팀" data-keywords="#마케팅,#아이디어" data-message="신규 캠페인 아이디어 정말 신선했어요!">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/14.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">김지연</span><span class="clap-role">마케팅팀 · 매니저</span><span class="clap-time">2일 전</span></div>
+            <div class="clap-message">신규 캠페인 아이디어 정말 신선했어요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#아이디어</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/15.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">박성호</span><span class="clap-role">운영팀 · 주니어</span><span class="clap-time">3일 전</span></div>
+            <div class="clap-message">고객 문의 빠르게 처리해줘서 고마워요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#고객지원</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/16.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">이은지</span><span class="clap-role">기획팀 · PM</span><span class="clap-time">3일 전</span></div>
+            <div class="clap-message">프로젝트 일정 관리 정말 잘해주셨어요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#기획</span><span class="clap-tag">#일정관리</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/17.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">최현우</span><span class="clap-role">개발팀 · 주니어</span><span class="clap-time">4일 전</span></div>
+            <div class="clap-message">코드 리팩토링 제안 덕분에 성능이 좋아졌어요.</div>
+            <div class="clap-tags-row"><span class="clap-tag">#개발</span><span class="clap-tag">#리팩토링</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/18.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">박소영</span><span class="clap-role">QA · 주니어</span><span class="clap-time">5일 전</span></div>
+            <div class="clap-message">테스트 문서화 정말 꼼꼼하게 해줘서 고마워요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#문서화</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/19.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">이재훈</span><span class="clap-role">운영팀 · 매니저</span><span class="clap-time">5일 전</span></div>
+            <div class="clap-message">팀원들 챙겨줘서 항상 고마워요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#팀워크</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+        <div class="clap-item">
+          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/20.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-info">
+            <div class="clap-meta-row"><span class="clap-name">정다은</span><span class="clap-role">마케팅팀 · 시니어</span><span class="clap-time">6일 전</span></div>
+            <div class="clap-message">SNS 홍보 전략 정말 인상적이었어요!</div>
+            <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#SNS</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside class="right-panel">
+      <div class="right-section">
+        <div class="right-label">이번주 클랩 리더</div>
+        <div class="right-profile-row">
+          <img src="https://i.pravatar.cc/100?img=5" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=6" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=7" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=10" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=11" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=12" class="right-profile-img" />
+        </div>
+      </div>
+      <div class="right-section">
+        <div class="right-label">클랩이 필요한 동료</div>
+        <div class="right-profile-row">
+          <img src="https://i.pravatar.cc/100?img=8" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=9" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=13" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=14" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=15" class="right-profile-img" />
+          <img src="https://i.pravatar.cc/100?img=16" class="right-profile-img" />
+        </div>
+      </div>
+      <div class="right-section">
+        <div class="right-label">이번주 활동 추이</div>
+        <canvas id="weeklyClapChart" width="260" height="180" style="max-width:100%; height:140px;"></canvas>
+      </div>
+      <div class="right-section">
+        <div class="right-label">오늘 받은 인정</div>
+        <div class="right-value">2</div>
+      </div>
+      <div class="right-section">
+        <div class="right-label">이번주 미션</div>
+        <div class="right-mission-row">
+          <span class="right-mission-title">3명에게 인정 보내기</span>
+          <span class="right-mission-percent">2/3명 완료</span>
+        </div>
+        <div class="right-mission-progress">
+          <div class="right-mission-bar">
+            <div class="right-mission-bar-fill" style="width: 66%"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <footer class="footer">
+    © 2024 Clap. All rights reserved.
+  </footer>
+  <script src="scripts.js"></script>
+  <script>
+  function updateUnderline() {
+    const activeTab = document.querySelector('.reward-tab.active');
+    const underline = document.querySelector('.reward-tabs-active-underline');
+    const tabsContainer = document.querySelector('.reward-tabs');
+    if (!activeTab || !underline || !tabsContainer) return;
+    const rect = activeTab.getBoundingClientRect();
+    const parentRect = tabsContainer.getBoundingClientRect();
+    underline.style.width = rect.width + 'px';
+    underline.style.left = (rect.left - parentRect.left) + 'px';
+    underline.style.display = 'block';
+  }
+  window.addEventListener('DOMContentLoaded', function() {
+    updateUnderline && updateUnderline();
+  });
+  const tabBtns = document.querySelectorAll('.reward-tab');
+  const clapLists = document.querySelectorAll('.clap-list');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const tab = this.getAttribute('data-tab');
+      clapLists.forEach(list => {
+        if (list.getAttribute('data-tab') === tab) {
+          list.style.removeProperty('display');
+        } else {
+          list.style.display = 'none';
+        }
+      });
+      setTimeout(() => { updateUnderline && updateUnderline(); }, 120);
+    });
+  });
+  window.addEventListener('resize', function() {
+    updateUnderline && updateUnderline();
+  });
+  </script>
+  <!-- Clap 작성 모달 -->
+  <div id="clapModal" class="clap-modal" style="display:none;">
+    <div class="clap-modal-overlay"></div>
+    <div class="clap-modal-content">
+      <div class="clap-modal-header">
+        <span class="clap-modal-icon">👏</span>
+        <span class="clap-modal-title">Clap 작성</span>
+        <button class="clap-modal-close" title="닫기">×</button>
+      </div>
+      <div class="clap-modal-body">
+        <label class="clap-modal-label">받는 사람</label>
+        <select class="clap-modal-input"><option>이소정</option></select>
+        <label class="clap-modal-label">팀/프로젝트</label>
+        <select class="clap-modal-input"><option>디자인팀</option></select>
+        <label class="clap-modal-label">키워드</label>
+        <input class="clap-modal-input clap-modal-keyword" placeholder="키워드 입력, 쉼표로 구분" />
+        <label class="clap-modal-label">후기</label>
+        <textarea class="clap-modal-textarea" rows="5" placeholder="후기를 작성해 주세요..."></textarea>
+      </div>
+      <div class="clap-modal-footer">
+        <button class="clap-modal-btn clap-modal-cancel">취소</button>
+        <button class="clap-modal-btn clap-modal-submit">보내기</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

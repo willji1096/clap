@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clap 리워드 시스템</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-hamburger material-icons" id="hamburger-menu" style="display:none;">menu</span>
+      <img src="assets/logo.png" alt="CLAP" class="topbar-logo" />
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-icon"><img src="assets/clap.svg" class="clap-svg-icon" alt="박수"></span>
+      <span class="topbar-icon material-icons">school</span>
+      <span class="topbar-icon material-icons">notifications_none</span>
+      <div class="topbar-profile">
+        <img class="profile-circle" src="https://i.pravatar.cc/150?img=3" alt="프로필" />
+        <div class="profile-info">
+          <span class="profile-name">지길환</span>
+          <span class="profile-email">willji@gilhwanji.com</span>
+        </div>
+        <span class="material-icons profile-arrow">expand_more</span>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <aside class="sidebar">
+      <nav class="menu">
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">emergency</span>
+            신규 기능
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <a class="menu-sub-btn active" href="culture.html">클랩 리워드 스토어</a>
+            <a class="menu-sub-btn" href="clapboard.html">클랩 보드</a>
+            <a class="menu-sub-btn" href="#">인재이탈방지(관리자전용)</a>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">track_changes</span>
+            목표
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <a class="menu-sub-btn">목표 관리</a>
+            <a class="menu-sub-btn">사이트 운영 관리</a>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">sync_alt</span>
+            1:1
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">멤버와의 1:1</button>
+            <button class="menu-sub-btn">미팅 관리</button>
+            <button class="menu-sub-btn">나의 1:1</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">thumb_up_off_alt</span>
+            피드백
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">나의 피드백</button>
+            <button class="menu-sub-btn">피드백 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">edit_note</span>
+            평가
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">나의 평가</button>
+            <button class="menu-sub-btn">평가 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">insert_photo_outlined</span>
+            성장 대시보드
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">나의 대시보드</button>
+            <button class="menu-sub-btn">멤버 대시보드</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">groups_2</span>
+            조직도 & 구성원
+          </button>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons">tune</span>
+            관리자 설정
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">권한 설정</button>
+            <button class="menu-sub-btn">구독 관리</button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <main class="main" style="background:#ffffff;">
+      <div style="max-width:980px;margin:0 auto;padding-top:36px;width:100%;">
+        <div class="reward-header">
+          <div class="reward-header-title">Clap 리워드 스토어</div>
+          <div class="reward-tabs-wrap">
+            <div class="reward-tabs">
+              <button class="reward-tab active" data-tab="reward">구매 리워드</button>
+              <button class="reward-tab" data-tab="mission">참여가능미션</button>
+              <button class="reward-tab" data-tab="history">내역</button>
+              <div class="reward-tabs-active-underline"></div>
+            </div>
+            <div class="reward-tabs-underline"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab-content="reward" style="display:block;">
+          <div class="reward-header-balance">
+            <span id="reward-comment"></span>
+            <div id="reward-amount"></div>
+          </div>
+          <div style="margin-bottom:36px;">
+            <div class="reward-section-title">기프트 카드 구매</div>
+            <div class="reward-card-list">
+              <div class="reward-card">
+                <div class="reward-image" style="background-image:url('assets/gift01.png')"></div>
+                <div class="reward-content">
+                  <div class="reward-title">스타벅스 커피 기프트 카드</div>
+                  <div class="reward-amount">6,261 <span>clap</span></div>
+                </div>
+              </div>
+              <div class="reward-card">
+                <div class="reward-image" style="background-image:url('assets/gift02.png')"></div>
+                <div class="reward-content">
+                  <div class="reward-title">교촌 치킨 기프트 카드</div>
+                  <div class="reward-amount">21,830 <span>clap</span></div>
+                </div>
+              </div>
+              <div class="reward-card">
+                <div class="reward-image" style="background-image:url('assets/gift03.png')"></div>
+                <div class="reward-content">
+                  <div class="reward-title">아웃백 2인 이용권</div>
+                  <div class="reward-amount">43,639 <span>clap</span></div>
+                </div>
+              </div>
+              <div class="reward-card">
+                <div class="reward-image" style="background-image:url('assets/gift04.png')"></div>
+                <div class="reward-content">
+                  <div class="reward-title">백화점 상품권</div>
+                  <div class="reward-amount">37,039 <span>clap</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:36px;">
+            <div class="reward-section-title">회사 복지 구매</div>
+            <div class="reward-card-list">
+              <div class="reward-card bg-blue">
+                <div class="reward-image-area" style="background:#E4FFF4;">
+                  <img src="assets/cgift01.png" class="welfare-img" alt="반차">
+                </div>
+                <div class="reward-content">
+                  <div class="reward-title">반차 구매</div>
+                  <div class="reward-amount">29,843 <span>clap</span></div>
+                </div>
+              </div>
+              <div class="reward-card bg-yellow">
+                <div class="reward-image-area" style="background:#FFF9E4;">
+                  <img src="assets/cgift02.png" class="welfare-img" alt="휴가">
+                </div>
+                <div class="reward-content">
+                  <div class="reward-title">1일 휴가권 구매</div>
+                  <div class="reward-amount">48,106 <span>clap</span></div>
+                </div>
+              </div>
+              <div class="reward-card bg-pink">
+                <div class="reward-image-area" style="background:#F4E4FF;">
+                  <img src="assets/cgift03.png" class="welfare-img" alt="리모트근무">
+                </div>
+                <div class="reward-content">
+                  <div class="reward-title">리모트 근무 5일</div>
+                  <div class="reward-amount">15,729 <span>clap</span></div>
+                </div>
+              </div>
+              <div class="reward-card bg-green">
+                <div class="reward-image-area" style="background:#FFF4E4;">
+                  <img src="assets/cgift04.png" class="welfare-img" alt="팀반차">
+                </div>
+                <div class="reward-content">
+                  <div class="reward-title">팀 반차+영화관람</div>
+                  <div class="reward-amount">44,423 <span>clap</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab-content="mission" style="display:none;">
+          <div class="mission-list">
+            <div class="mission-card">
+              <div class="mission-title">오늘 동료 1명에게 피드백 주기</div>
+              <div class="mission-desc">동료의 좋은 점을 찾아 칭찬 피드백을 남겨보세요. 서로의 성장을 응원할 수 있습니다.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+            <div class="mission-card">
+              <div class="mission-title">Kudos 3회 보내기</div>
+              <div class="mission-desc">감사/칭찬의 메시지를 3명에게 보내면 미션이 완료됩니다.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+            <div class="mission-card">
+              <div class="mission-title">멘토링 세션 참여 신청하기</div>
+              <div class="mission-desc">관심 있는 멘토링 세션에 신청해보세요. 새로운 인사이트를 얻을 수 있습니다.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+            <div class="mission-card">
+              <div class="mission-title">리더 피드백 남기기</div>
+              <div class="mission-desc">팀 리더에게 건설적인 피드백을 남기면 미션이 완료됩니다.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+            <div class="mission-card">
+              <div class="mission-title">1:1 미팅 성실 참여하기</div>
+              <div class="mission-desc">정해진 시간에 1:1 미팅에 참여하고, 회의록을 남겨보세요.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+            <div class="mission-card">
+              <div class="mission-title">사내 행사 후기 남기기</div>
+              <div class="mission-desc">최근 참여한 사내 행사에 대한 후기를 남겨주세요.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+            <div class="mission-card">
+              <div class="mission-title">오늘 점심 같이 먹기</div>
+              <div class="mission-desc">동료와 함께 점심을 먹으며 소통의 시간을 가져보세요. 친밀감이 높아집니다.</div>
+              <div class="mission-bottom">
+                <span class="mission-reward">+1,000 clap</span>
+                <button class="mission-btn">지금 시작하기</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab-content="history" style="display:none;">
+          <div class="history-subtabs">
+            <button class="history-subtab active" data-type="earn">적립 내역</button>
+            <button class="history-subtab" data-type="exchange">교환 내역</button>
+          </div>
+          <div class="history-table-wrap" data-type="earn">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>내용</th>
+                  <th>포인트</th>
+                  <th>비고</th>
+                </tr>
+              </thead>
+              <tbody id="earn-tbody">
+              </tbody>
+            </table>
+            <ul class="pagination">
+              <li class="active">1</li>
+              <li>2</li>
+              <li>3</li>
+              <li>4</li>
+              <li>5</li>
+              <li>다음</li>
+            </ul>
+          </div>
+          <div class="history-table-wrap" data-type="exchange" style="display:none;">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>상품명</th>
+                  <th>포인트</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="exchange-tbody">
+              </tbody>
+            </table>
+            <ul class="pagination">
+              <li class="active">1</li>
+              <li>2</li>
+              <li>3</li>
+              <li>4</li>
+              <li>5</li>
+              <li>다음</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="footer">
+    © 2024 Clap. All rights reserved.
+  </footer>
+  <div id="exchange-modal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.32);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;max-width:320px;width:90vw;padding:32px 20px 20px 20px;box-shadow:0 4px 24px rgba(0,0,0,0.08);text-align:center;position:relative;">
+      <button id="exchange-modal-close" style="position:absolute;right:12px;top:12px;background:none;border:none;font-size:22px;cursor:pointer;">&times;</button>
+      <div id="exchange-modal-title" style="font-size:18px;font-weight:700;margin-bottom:12px;">상품명</div>
+      <div id="exchange-modal-amount" style="font-size:22px;font-weight:700;color:#2563eb;margin-bottom:24px;letter-spacing:-1px;">
+        금액
+      </div>
+      <div id="exchange-modal-complete" style="display:none;font-size:18px;font-weight:400;color:#666;line-height:1.5;margin-bottom:24px;text-align:center;"></div>
+      <button id="exchange-modal-confirm" style="background:#2563eb;color:#fff;font-weight:700;border:none;border-radius:8px;padding:10px 0;width:100%;font-size:16px;cursor:pointer;">교환하기</button>
+      <button id="exchange-modal-cancel" style="background:#f4f4f4;color:#888;font-weight:500;border:none;border-radius:8px;padding:10px 0;width:100%;font-size:15px;cursor:pointer;margin-top:8px;">취소</button>
+    </div>
+  </div>
+  <script src="scripts.js"></script>
+  <script>
+    // 랜덤 잔액/금액 생성
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    const balance = rand(10000, 300000);
+    const prices = Array.from({length:8},()=>rand(200,500));
+    document.body.innerHTML = document.body.innerHTML.replace('{잔액}', balance.toLocaleString()+" clap")
+      .replace('{랜덤금액1}', prices[0])
+      .replace('{랜덤금액2}', prices[1])
+      .replace('{랜덤금액3}', prices[2])
+      .replace('{랜덤금액4}', prices[3])
+      .replace('{랜덤금액5}', prices[4])
+      .replace('{랜덤금액6}', prices[5])
+      .replace('{랜덤금액7}', prices[6])
+      .replace('{랜덤금액8}', prices[7]);
+
+    // 잔액/코멘트/이모지/컬러 5가지 세트
+    const rewardStates = [
+      {
+        amount: '50,000',
+        comment: '🔥적극적으로 참여해보세요!',
+        emoji: '🚀',
+        bg: '#e0f3ff',
+        color: '#2563eb'
+      },
+      {
+        amount: '100,000',
+        comment: '👍꾸준함이 멋져요',
+        emoji: '💪',
+        bg: '#ffe9e0',
+        color: '#a85b2a'
+      },
+      {
+        amount: '150,000',
+        comment: '👏성장하는 모습이 인상적이에요',
+        emoji: '🌱',
+        bg: '#e9ffe0',
+        color: '#3ba85b'
+      },
+      {
+        amount: '200,000',
+        comment: '🎉팀의 핵심! 모두가 인정해요',
+        emoji: '🏆',
+        bg: '#f0e0ff',
+        color: '#7b3ba8'
+      },
+      {
+        amount: '250,000',
+        comment: '🥇정말 열심히 활동하셨군요',
+        emoji: '⭐️',
+        bg: '#fffbe0',
+        color: '#b89c1a'
+      }
+    ];
+
+    function setRandomRewardState() {
+      const state = rewardStates[Math.floor(Math.random() * rewardStates.length)];
+      document.getElementById('reward-comment').innerHTML = `<span style="display:inline-block;background:${state.bg};color:${state.color};font-size:14px;padding:4px 16px 5px 12px;border-radius:16px;font-weight:500;margin-bottom:6px;">${state.emoji}${state.comment}</span>`;
+      document.getElementById('reward-amount').innerHTML = `${state.amount}clap`;
+    }
+    window.addEventListener('DOMContentLoaded', setRandomRewardState);
+
+    function updateUnderline() {
+      const activeTab = document.querySelector('.reward-tab.active');
+      const underline = document.querySelector('.reward-tabs-active-underline');
+      const tabsContainer = document.querySelector('.reward-tabs');
+      if (!activeTab || !underline || !tabsContainer) return;
+      const rect = activeTab.getBoundingClientRect();
+      const parentRect = tabsContainer.getBoundingClientRect();
+      underline.style.width = rect.width + 'px';
+      underline.style.left = (rect.left - parentRect.left) + 'px';
+      underline.style.display = 'block';
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      updateUnderline && updateUnderline();
+    });
+
+    const tabBtns = document.querySelectorAll('.reward-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const tab = this.getAttribute('data-tab');
+        tabContents.forEach(c => {
+          c.style.display = c.getAttribute('data-tab-content') === tab ? 'block' : 'none';
+        });
+        setTimeout(() => { updateUnderline && updateUnderline(); }, 120);
+      });
+    });
+    window.addEventListener('resize', function() {
+      updateUnderline && updateUnderline();
+    });
+
+    // 기프트/복지 카드별 현실적 랜덤 금액 생성
+    const giftCardPrices = [
+      rand(3000, 10000), // 스타벅스
+      rand(15000, 25000), // 치킨
+      rand(40000, 50000), // 아웃백
+      rand(20000, 50000)  // 백화점
+    ];
+    const welfarePrices = [
+      rand(20000, 40000), // 반차
+      rand(30000, 50000), // 휴가
+      rand(10000, 30000), // 리모트근무
+      rand(25000, 50000)  // 팀반차
+    ];
+
+    window.addEventListener('DOMContentLoaded', function() {
+      // 모든 .reward-card-list를 가져와서
+      const cardLists = document.querySelectorAll('.reward-card-list');
+      if (cardLists.length > 1) {
+        // 첫 번째: 기프트카드
+        const giftAmounts = cardLists[0].querySelectorAll('.reward-amount');
+        giftAmounts.forEach((el, i) => {
+          if(giftCardPrices[i]) el.textContent = giftCardPrices[i].toLocaleString() + ' clap';
+        });
+        // 두 번째: 복지카드
+        const welfareAmounts = cardLists[1].querySelectorAll('.reward-amount');
+        welfareAmounts.forEach((el, i) => {
+          if(welfarePrices[i]) el.textContent = welfarePrices[i].toLocaleString() + ' clap';
+        });
+      }
+    });
+
+    document.querySelectorAll('.reward-card').forEach(function(card) {
+      card.addEventListener('click', function(e) {
+        const title = card.querySelector('.reward-title')?.textContent || '';
+        const amount = card.querySelector('.reward-amount')?.textContent || '';
+        document.getElementById('exchange-modal-title').textContent = title;
+        document.getElementById('exchange-modal-amount').textContent = amount;
+        document.getElementById('exchange-modal').style.display = 'flex';
+      });
+    });
+    document.getElementById('exchange-modal-close').onclick =
+    document.getElementById('exchange-modal-cancel').onclick = function() {
+      document.getElementById('exchange-modal').style.display = 'none';
+    };
+    document.getElementById('exchange-modal-confirm').onclick = function() {
+      document.getElementById('exchange-modal-title').textContent = '교환이 완료되었습니다!';
+      document.getElementById('exchange-modal-amount').style.display = 'none';
+      var completeMsg = document.getElementById('exchange-modal-complete');
+      completeMsg.textContent = '입력하신 휴대폰 번호로 교환권이 발송되었습니다.';
+      completeMsg.style.display = 'block';
+      document.getElementById('exchange-modal-confirm').style.display = 'none';
+      document.getElementById('exchange-modal-cancel').style.display = 'none';
+      setTimeout(function() {
+        document.getElementById('exchange-modal').style.display = 'none';
+        document.getElementById('exchange-modal-confirm').style.display = '';
+        document.getElementById('exchange-modal-cancel').style.display = '';
+        document.getElementById('exchange-modal-amount').style.display = '';
+        completeMsg.style.display = 'none';
+      }, 2000);
+    };
+
+    // 내역 서브탭 토글
+    document.querySelectorAll('.history-subtab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.history-subtab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var type = tab.getAttribute('data-type');
+        document.querySelectorAll('.history-table-wrap').forEach(function(wrap) {
+          wrap.style.display = (wrap.getAttribute('data-type') === type) ? '' : 'none';
+        });
+      });
+    });
+
+    // 적립/교환 row 데이터 배열로 분리
+    const earnRows = Array.from({length: 100}, (_, i) => [
+      `2024-06-${(i%30+1).toString().padStart(2,'0')}`,
+      `미션 완료(동료 피드백) #${i+1}`,
+      `+${(1000 + (i%5)*500).toLocaleString()}`,
+      i%2===0 ? '미션' : '보너스'
+    ]);
+    const exchangeRows = Array.from({length: 100}, (_, i) => [
+      `2024-06-${(i%30+1).toString().padStart(2,'0')}`,
+      `스타벅스 커피 기프트 카드 #${i+1}`,
+      `-${(6000 + (i%5)*1000).toLocaleString()}`,
+      '교환완료'
+    ]);
+    function renderTableRows(rows, page, perPage, tbodyId, type) {
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = '';
+      const start = (page-1)*perPage;
+      const end = Math.min(start+perPage, rows.length);
+      for(let i=start;i<end;i++) {
+        const row = rows[i];
+        const tr = document.createElement('tr');
+        row.forEach((cell, idx) => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          if(type==='earn' && idx===2) td.className = 'history-plus';
+          if(type==='exchange' && idx===2) td.className = 'history-minus';
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      }
+    }
+    function setupPagination(rows, perPage, ulSelector, renderFn) {
+      const ul = document.querySelector(ulSelector);
+      ul.innerHTML = '';
+      const pageCount = Math.ceil(rows.length/perPage);
+      let currentPage = 1;
+      function renderPagination(page) {
+        ul.innerHTML = '';
+        currentPage = page;
+        // 좌측 화살표 (SVG)
+        const prev = document.createElement('li');
+        prev.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.5 14L7.5 9L11.5 4" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        prev.className = 'pagination-arrow';
+        prev.style.userSelect = 'none';
+        prev.style.fontWeight = 'bold';
+        prev.style.opacity = (page === 1) ? '0.4' : '1';
+        prev.style.cursor = (page === 1) ? 'default' : 'pointer';
+        prev.addEventListener('click', function() {
+          if(page > 1) {
+            renderPagination(page-1);
+            renderFn(page-1);
+          }
+        });
+        ul.appendChild(prev);
+        // 1~10까지 쭉 노출
+        let end = pageCount > 10 ? 10 : pageCount;
+        for(let i=1;i<=end;i++) {
+          const li = document.createElement('li');
+          li.textContent = i;
+          if(i === page) li.className = 'active';
+          li.addEventListener('click', function() {
+            renderPagination(i);
+            renderFn(i);
+          });
+          ul.appendChild(li);
+        }
+        // 우측 화살표 (SVG)
+        const next = document.createElement('li');
+        next.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 4L10.5 9L6.5 14" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        next.className = 'pagination-arrow';
+        next.style.userSelect = 'none';
+        next.style.fontWeight = 'bold';
+        next.style.opacity = (page === end) ? '0.4' : '1';
+        next.style.cursor = (page === end) ? 'default' : 'pointer';
+        next.addEventListener('click', function() {
+          if(page < end) {
+            renderPagination(page+1);
+            renderFn(page+1);
+          }
+        });
+        ul.appendChild(next);
+      }
+      renderPagination(1);
+    }
+    // 최초 렌더
+    renderTableRows(earnRows, 1, 10, 'earn-tbody', 'earn');
+    renderTableRows(exchangeRows, 1, 10, 'exchange-tbody', 'exchange');
+    setupPagination(earnRows, 10, '.history-table-wrap[data-type="earn"] .pagination', p=>renderTableRows(earnRows, p, 10, 'earn-tbody', 'earn'));
+    setupPagination(exchangeRows, 10, '.history-table-wrap[data-type="exchange"] .pagination', p=>renderTableRows(exchangeRows, p, 10, 'exchange-tbody', 'exchange'));
+  </script>
+  <style>
+    .mission-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .mission-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1.5px solid #f0f2f5;
+      box-shadow: none;
+      padding: 24px 20px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 160px;
+    }
+    .mission-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 8px;
+    }
+    .mission-desc {
+      font-size: 15px;
+      color: #888;
+      margin-bottom: 18px;
+    }
+    .mission-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+    .mission-reward {
+      color: #22b573;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    @media (max-width: 900px) {
+      .mission-list {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .mission-card {
+        padding: 18px 12px 14px 12px;
+        min-height: 120px;
+      }
+    }
+  </style>
+</body>
+</html> 

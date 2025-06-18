@@ -1,0 +1,1251 @@
+f<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>목표 관리</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: #f7f9fb;
+      color: #222;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 240px;
+      background: #fff;
+      border-right: 1px solid #ececec;
+      padding: 24px 20px 16px 20px;
+      box-sizing: content-box;
+      min-height: 100vh;
+      display: block;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      padding-left: 32px;
+    }
+    .logo img {
+      height: 28px;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      margin-top: 8px;
+    }
+    .menu-group {
+      margin-bottom: 0;
+    }
+    .menu-main {
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 0;
+      font-size: 16px;
+      color: #5c667b;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      transition: background 0.2s, color 0.2s;
+      border-radius: 0;
+    }
+    .menu-main .arrow {
+      margin-left: auto;
+      font-size: 18px;
+      color: #bdbdbd;
+    }
+    .menu-main:focus {
+      outline: none;
+    }
+    .menu-sub {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-left: 0;
+      margin-bottom: 0;
+      margin-top: 2px;
+    }
+    .menu-sub-btn {
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 7px 0 7px 32px;
+      font-size: 15px;
+      color: #5c667b;
+      font-weight: 400;
+      cursor: pointer;
+      border-radius: 6px;
+      margin: 0;
+      transition: background 0.2s, color 0.2s, padding 0.2s;
+    }
+    .menu-sub-btn.active {
+      background: #eaf3ff;
+      color: #2563eb;
+      font-weight: 700;
+    }
+    .menu-sub-btn:hover {
+      background: #f4f8fd;
+      color: #2563eb;
+    }
+    .menu-main .material-icons {
+      width: 20px;
+      min-width: 20px;
+      max-width: 20px;
+      flex-shrink: 0;
+      display: inline-block;
+      text-align: center;
+    }
+    /* 섹션 간 여백 */
+    .menu-group + .menu-group {
+      margin-top: 18px;
+    }
+    .main {
+      flex: 1;
+      padding: 40px 60px;
+      box-sizing: border-box;
+      background: #F1F3F5;
+    }
+    .main-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+    }
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .filter-bar input, .filter-bar select {
+      padding: 8px 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      background: #fff;
+      color: #222;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .filter-bar input:focus, .filter-bar select:focus {
+      border: 1.5px solid #3a5cff;
+    }
+    .filter-bar .btn-primary {
+      background: #3a5cff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .filter-bar .btn-primary:hover {
+      background: #2541b2;
+    }
+    .table-wrap {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: none;
+      border: 1px solid #ececec;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      background: #fff;
+    }
+    th, td {
+      padding: 14px 10px;
+      text-align: left;
+    }
+    th {
+      background: #f7f9fb;
+      font-weight: 500;
+      color: #888;
+      border-bottom: 1px solid #ececec;
+    }
+    td {
+      border-bottom: 1px solid #f7f9fb;
+      color: #444;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 0;
+      color: #bbb;
+      font-size: 16px;
+    }
+    .empty-state img {
+      width: 54px;
+      opacity: 0.18;
+      margin-bottom: 10px;
+    }
+    .topbar {
+      width: 100vw;
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid #ececec;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 36px 0 0;
+      box-sizing: border-box;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 32px;
+    }
+    .topbar-logo {
+      width: 100px;
+      height: auto;
+    }
+    .topbar-title {
+      font-weight: 700;
+      color: #222;
+      font-size: 22px;
+      letter-spacing: -1px;
+      margin-left: 2px;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-icon {
+      background: #e5e8ed;
+      color: #6b7684;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-right: 2px;
+    }
+    .topbar-profile {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 24px;
+      border: 1.5px solid #e5e8ed;
+      padding: 4px 18px 4px 8px;
+      gap: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+      margin-left: 8px;
+    }
+    .profile-circle {
+      background: #3a5cff;
+      color: #fff;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      object-fit: cover;
+    }
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 4px;
+    }
+    .profile-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 1px;
+    }
+    .profile-email {
+      font-size: 12px;
+      color: #888;
+    }
+    .profile-arrow {
+      color: #bdbdbd;
+      font-size: 20px;
+      margin-left: 2px;
+    }
+    .menu-sub.hide {
+      display: none;
+    }
+    .menu-main .arrow {
+      transition: transform 0.2s;
+    }
+    .academy-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      margin-left: 2px;
+    }
+    .academy-icon {
+      font-size: 22px;
+      color: #ffd600;
+      margin-bottom: 2px;
+    }
+    .academy-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #222;
+      letter-spacing: -0.2px;
+    }
+    .academy-banner-box {
+      background: #edeff1;
+      border-radius: 16px;
+      padding: 0;
+      margin-bottom: 36px;
+      box-shadow: none;
+      position: relative;
+    }
+    .academy-banner-inner {
+      display: flex;
+      align-items: center;
+      background: #fafbfc;
+      border-radius: 14px;
+      padding: 0 20px;
+      min-height: 48px;
+      box-shadow: none;
+      margin-bottom: 18px;
+      gap: 12px;
+    }
+    .academy-banner-emoji {
+      font-size: 22px;
+      color: #bdbdbd;
+      margin-right: 8px;
+    }
+    .academy-banner-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #222;
+      margin-right: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .academy-banner-desc {
+      font-size: 15px;
+      color: #444;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .academy-banner-link {
+      color: #3182f6;
+      font-weight: 500;
+      margin-left: 8px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .academy-banner-link:hover {
+      text-decoration: underline;
+    }
+    .academy-banner-close {
+      background: none;
+      border: none;
+      color: #8a94a6;
+      font-size: 20px;
+      cursor: pointer;
+      margin-left: 12px;
+      margin-right: 2px;
+      padding: 4px;
+      align-self: flex-start;
+    }
+    .goal-label {
+      font-size: 15px;
+      color: #6b7684;
+      margin-bottom: 6px;
+      margin-left: 2px;
+      font-weight: 500;
+    }
+    .goal-filter-bar {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px 28px 12px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .goal-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .goal-filter-row-bottom {
+      margin-top: 12px;
+      gap: 12px;
+    }
+    .goal-search-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1.2;
+    }
+    .goal-search-input {
+      border: none;
+      background: #f5f7fa;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 15px;
+      width: 220px;
+      color: #222;
+    }
+    .goal-search-input:focus {
+      outline: 1.5px solid #2563eb;
+    }
+    .search-icon {
+      color: #bdbdbd;
+      font-size: 22px;
+    }
+    .goal-select {
+      border: 1px solid #e0e0e0;
+      background: #f5f7fa;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 15px;
+      color: #222;
+      min-width: 110px;
+    }
+    .goal-date-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .goal-date {
+      border: 1px solid #e0e0e0;
+      background: #f5f7fa;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 15px;
+      color: #222;
+      width: 130px;
+    }
+    .goal-date-sep {
+      color: #bdbdbd;
+      font-size: 18px;
+      margin: 0 2px;
+    }
+    .goal-filter-btn {
+      border: 1.5px solid #e0e0e0;
+      background: #fff;
+      border-radius: 6px;
+      padding: 8px 18px;
+      font-size: 15px;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: border 0.2s;
+    }
+    .goal-filter-btn:hover {
+      border: 1.5px solid #2563eb;
+    }
+    .goal-filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      margin-bottom: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+    }
+    .goal-badge {
+      background: none;
+      color: #3182f6;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 0;
+      border: none;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      height: auto;
+      line-height: 1;
+      box-shadow: none;
+    }
+    .goal-add-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      color: #3182f6;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      border-radius: 0;
+      height: auto;
+      padding: 0 8px;
+      cursor: pointer;
+      transition: color 0.15s;
+      box-shadow: none;
+    }
+    .goal-add-btn:hover {
+      color: #1746a2;
+      background: none;
+      border: none;
+    }
+    .goal-add-btn .material-icons {
+      font-size: 20px;
+      vertical-align: middle;
+      margin-right: 2px;
+    }
+    .goal-cycle-dropdown-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 40px;
+      margin-bottom: 40px;
+      width: 100%;
+    }
+    .goal-tabs-row {
+      margin-bottom: 12px;
+      border-bottom: 1.5px solid #e5e8eb;
+      padding-bottom: 0;
+    }
+    .goal-cycle-dropdown {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #222;
+      cursor: pointer;
+    }
+    .goal-tabs {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .goal-tab {
+      padding: 8px 0 0 0;
+      border-bottom: 2.5px solid transparent;
+      position: relative;
+      z-index: 1;
+    }
+    .goal-tab.active {
+      color: #2563eb;
+      border-bottom: 2.5px solid #2563eb;
+      z-index: 2;
+    }
+    .goal-table-wrap {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+      margin-top: 10px;
+    }
+    .goal-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      background: #fff;
+    }
+    .goal-table th, .goal-table td {
+      padding: 16px 10px;
+      text-align: left;
+    }
+    .goal-table th {
+      background: #f7f9fb;
+      font-weight: 600;
+      color: #2563eb;
+      border-bottom: 1.5px solid #ececec;
+      font-size: 15px;
+    }
+    .goal-table td {
+      border-bottom: 1px solid #f7f9fb;
+      color: #444;
+    }
+    .goal-empty-state {
+      text-align: center;
+      padding: 70px 0 60px 0;
+      color: #bbb;
+      font-size: 16px;
+    }
+    .goal-empty-state img {
+      width: 100px;
+      opacity: 0.18;
+      margin-bottom: 14px;
+    }
+    /* --- 클랩 라이브 1:1 스타일로 goal-filter-row-top 전체 개선 --- */
+    .goal-filter-row.goal-filter-row-top {
+      background: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-bottom: none !important;
+      padding: 0 !important;
+    }
+    .goal-filter-col,
+    .goal-filter-col-middle,
+    .goal-filter-col-period {
+      min-width: 0;
+      flex: 1 1 0;
+      box-sizing: border-box;
+    }
+    .goal-label,
+    .goal-filter-label {
+      font-size: 14px;
+      color: #6b7684;
+      font-weight: 500;
+      margin-bottom: 2px;
+      letter-spacing: -0.01em;
+    }
+    .goal-search-group {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0 14px;
+      height: 44px;
+      gap: 8px;
+      box-sizing: border-box;
+    }
+    .goal-search-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 15px;
+      flex: 1;
+      height: 42px;
+      padding: 0 4px;
+      color: #222;
+    }
+    .goal-search-input::placeholder {
+      color: #bdbdbd;
+      font-weight: 400;
+    }
+    .search-icon {
+      font-size: 22px;
+      color: #bdbdbd;
+      vertical-align: middle;
+    }
+    .goal-select {
+      width: 100%;
+      height: 44px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 15px;
+      color: #222;
+      padding: 0 14px;
+      outline: none;
+      appearance: none;
+      box-sizing: border-box;
+    }
+    .goal-select:focus {
+      border: 1.5px solid #3182f6;
+    }
+    .goal-date-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .goal-date {
+      width: 130px;
+      height: 44px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 15px;
+      color: #222;
+      padding: 0 14px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .goal-date:focus {
+      border: 1.5px solid #3182f6;
+    }
+    .goal-date-sep {
+      color: #bdbdbd;
+      font-size: 18px;
+      margin: 0 2px;
+    }
+    .goal-filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      margin-bottom: 0;
+    }
+    .goal-badge {
+      background: #e6f4fa;
+      color: #3182f6;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 16px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      height: 36px;
+      line-height: 1;
+      box-sizing: border-box;
+    }
+    .goal-add-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #3182f6;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      height: 44px;
+      padding: 0 22px;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: none;
+    }
+    .goal-add-btn:hover {
+      background: #2563eb;
+    }
+    .goal-add-btn .material-icons {
+      font-size: 22px;
+      vertical-align: middle;
+      margin-right: 2px;
+    }
+    @media (max-width: 1200px) {
+      .main {
+        padding: 32px 12px;
+      }
+      .goal-filter-row.goal-filter-row-top {
+        gap: 18px;
+        padding: 18px 10px 0 10px;
+      }
+      .goal-filter-col {
+        min-width: 140px;
+      }
+      .goal-filter-col-period {
+        min-width: 180px;
+        max-width: 220px;
+        flex: 0 0 180px;
+      }
+    }
+    @media (max-width: 1024px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        display: none !important;
+      }
+      .sidebar.sidebar-mobile.open {
+        display: block !important;
+      }
+      .main {
+        padding: 18px 4vw;
+      }
+      .goal-filter-row.goal-filter-row-top {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px 2vw 0 2vw;
+        min-height: 0;
+      }
+      .goal-filter-col,
+      .goal-filter-col-middle,
+      .goal-filter-col-period {
+        min-width: 120px;
+        max-width: 100%;
+        flex: 1 1 180px;
+      }
+      .goal-filter-actions {
+        flex-basis: 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+        margin-top: 8px;
+      }
+      .goal-badge, .goal-add-btn {
+        height: 36px;
+        font-size: 13px;
+        padding: 0 10px;
+        border-radius: 8px;
+      }
+      .goal-search-group, .goal-select, .goal-date {
+        height: 36px;
+        font-size: 13px;
+        border-radius: 8px;
+        padding: 0 8px;
+      }
+      .goal-search-input {
+        height: 34px;
+        font-size: 13px;
+      }
+    }
+    @media (max-width: 768px) {
+      .main {
+        padding: 8px 2vw;
+      }
+      .goal-filter-row.goal-filter-row-top {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 2vw 0 2vw;
+        border-radius: 10px 10px 0 0;
+      }
+      .goal-filter-col,
+      .goal-filter-col-middle,
+      .goal-filter-col-period {
+        min-width: 100%;
+        max-width: 100%;
+        flex: 1 1 100%;
+      }
+      .goal-filter-actions {
+        flex-basis: 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+        margin-top: 6px;
+        gap: 8px;
+      }
+      .goal-badge, .goal-add-btn {
+        height: 32px;
+        font-size: 12px;
+        padding: 0 8px;
+        border-radius: 7px;
+      }
+      .goal-search-group, .goal-select, .goal-date {
+        height: 32px;
+        font-size: 12px;
+        border-radius: 7px;
+        padding: 0 6px;
+      }
+      .goal-search-input {
+        height: 30px;
+        font-size: 12px;
+      }
+      .goal-table th, .goal-table td {
+        padding: 8px 4px;
+        font-size: 12px;
+      }
+      .goal-table-wrap {
+        border-radius: 8px;
+      }
+      .academy-banner-inner {
+        padding: 12px 8px 10px 8px;
+      }
+      .academy-banner-title {
+        font-size: 13px;
+      }
+      .academy-banner-desc {
+        font-size: 11px;
+        margin-left: 12px;
+      }
+    }
+    .topbar-hamburger {
+      font-size: 30px;
+      color: #222;
+      margin-right: 10px;
+      cursor: pointer;
+      display: none;
+    }
+    @media (max-width: 1024px) {
+      .topbar-hamburger {
+        display: inline-flex !important;
+        align-items: center;
+      }
+    }
+    /* 오버레이 사이드바 */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.18);
+    }
+    .sidebar.sidebar-mobile {
+      display: block;
+      position: fixed;
+      z-index: 2100;
+      left: -240px;
+      top: 0;
+      width: 240px;
+      height: 100vh;
+      background: #fff;
+      box-shadow: 2px 0 16px rgba(0,0,0,0.08);
+      transition: left 0.25s cubic-bezier(.4,0,.2,1);
+      padding: 24px 20px 16px 20px;
+      border-right: 1px solid #ececec;
+    }
+    .sidebar.sidebar-mobile.open {
+      left: 0;
+    }
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none !important;
+      }
+      .sidebar.sidebar-mobile.open {
+        display: block !important;
+      }
+    }
+    /* 필터 바와 아래 섹션 간 여백 */
+    .goal-section {
+      margin-bottom: 18px;
+    }
+    /* 필터 바 */
+    .goal-filter-row.goal-filter-row-top {
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+      padding: 28px 32px 0 32px;
+      gap: 8px;
+      align-items: center;
+      min-height: 88px;
+      border-bottom: 1.5px solid #f2f4f7;
+    }
+    /* 사이클/탭 */
+    .goal-cycle-row {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      background: #fff;
+      border-radius: 0 0 16px 16px;
+      padding: 0 32px 0 32px;
+      min-height: 54px;
+      border-bottom: 1.5px solid #f2f4f7;
+    }
+    .goal-cycle-dropdown {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #222;
+      cursor: pointer;
+    }
+    .goal-tabs {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+    .goal-tab {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      color: #bdbdbd;
+      padding: 8px 0 6px 0;
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      transition: color 0.2s, border 0.2s;
+    }
+    .goal-tab.active {
+      color: #2563eb;
+      border-bottom: 2.5px solid #2563eb;
+    }
+    /* 테이블 */
+    .goal-table-wrap {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+      margin-top: 10px;
+      border: 1.5px solid #f2f4f7;
+    }
+    .goal-table th, .goal-table td {
+      padding: 16px 10px;
+      text-align: left;
+    }
+    .goal-table th {
+      background: #f7f9fb;
+      font-weight: 600;
+      color: #2563eb;
+      border-bottom: 1.5px solid #ececec;
+      font-size: 15px;
+    }
+    .goal-table td {
+      border-bottom: 1px solid #f7f9fb;
+      color: #444;
+    }
+    /* empty state */
+    .goal-empty-state {
+      text-align: center;
+      padding: 70px 0 60px 0;
+      color: #bbb;
+      font-size: 16px;
+      background: #fff;
+    }
+    .goal-empty-state img {
+      width: 80px;
+      opacity: 0.13;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-hamburger material-icons" id="hamburger-menu" style="display:none;">menu</span>
+      <img src="assets/logo.png" alt="CLAP" class="topbar-logo" />
+      <!-- <span class="topbar-title">CLAP</span> -->
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-icon material-icons">school</span>
+      <span class="topbar-icon material-icons">notifications_none</span>
+      <div class="topbar-profile">
+        <img class="profile-circle" src="https://i.pravatar.cc/150?img=3" alt="프로필" />
+        <div class="profile-info">
+          <span class="profile-name">지길환</span>
+          <span class="profile-email">willji@gilhwanji.com</span>
+        </div>
+        <span class="material-icons profile-arrow">expand_more</span>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <aside class="sidebar">
+      <!-- <div class="logo">
+        <img src="assets/logo.png" alt="CLAP">
+        <span style="font-weight:700;color:#222;font-size:22px;letter-spacing:-1px;">CLAP</span>
+      </div> -->
+      <nav class="menu">
+        <div class="menu-group">
+          <a href="culture.html" style="text-decoration:none;">
+            <button class="menu-main">
+              <span class="material-icons" style="font-size:20px;color:#bdbdbd;">psychology_alt</span>
+              조직문화 진단
+            </button>
+          </a>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;">track_changes</span>
+            목표
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn active">목표 관리</button>
+            <button class="menu-sub-btn">사이트 운영 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;">sync_alt</span>
+            1:1
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">멤버와의 1:1</button>
+            <button class="menu-sub-btn">미팅 관리</button>
+            <button class="menu-sub-btn">나의 1:1</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;">thumb_up_off_alt</span>
+            피드백
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">나의 피드백</button>
+            <button class="menu-sub-btn">피드백 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;">edit_note</span>
+            평가
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">나의 평가</button>
+            <button class="menu-sub-btn">평가 관리</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;vertical-align:middle;">insert_photo_outlined</span>
+            성장 대시보드
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">나의 대시보드</button>
+            <button class="menu-sub-btn">멤버 대시보드</button>
+          </div>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;">groups_2</span>
+            조직도 &amp; 구성원
+          </button>
+        </div>
+        <div class="menu-group">
+          <button class="menu-main">
+            <span class="material-icons" style="font-size:20px;color:#bdbdbd;">tune</span>
+            관리자 설정
+            <span class="material-icons arrow">expand_more</span>
+          </button>
+          <div class="menu-sub">
+            <button class="menu-sub-btn">권한 설정</button>
+            <button class="menu-sub-btn">구독 관리</button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <main class="main">
+      <!-- 상단 타이틀 분리 -->
+      <div class="academy-header">
+        <span class="material-icons academy-icon">emoji_objects</span>
+        <span class="academy-title">클랩 아카데미</span>
+      </div>
+      <!-- 안내 박스 분리 -->
+      <div class="academy-banner-box">
+        <div class="academy-banner-inner">
+          <span class="academy-banner-emoji">🎯</span>
+          <span class="academy-banner-title">목표를 제대로 수립하고 관리하는 방법</span>
+          <span class="academy-banner-desc">체계적으로 목표를 수립하는 단계와 좋은 목표의 기준을 알려드려요.</span>
+          <a href="#" class="academy-banner-link">자세히 보기</a>
+          <button class="academy-banner-close"><span class="material-icons">close</span></button>
+        </div>
+      </div>
+
+      <!-- 목표/필터/탭/테이블 상단부 -->
+      <div class="goal-section">
+        <div class="goal-filter-row goal-filter-row-top">
+          <div class="goal-filter-col">
+            <div class="goal-label">목표</div>
+            <div class="goal-search-group">
+              <span class="material-icons search-icon">search</span>
+              <input type="text" placeholder="목표로 검색" class="goal-search-input">
+            </div>
+          </div>
+          <div class="goal-filter-col goal-filter-col-middle">
+            <div class="goal-filter-label">상태</div>
+            <select class="goal-select"><option>상태</option></select>
+          </div>
+          <div class="goal-filter-col goal-filter-col-period">
+            <div class="goal-filter-label">기간</div>
+            <div class="goal-date-group">
+              <input type="date" class="goal-date" placeholder="시작 날짜">
+              <span class="goal-date-sep">~</span>
+              <input type="date" class="goal-date" placeholder="마지막 날짜">
+            </div>
+          </div>
+        </div>
+        <div class="goal-cycle-dropdown-row">
+          <div class="goal-cycle-dropdown">
+            <span>모든 사이클</span>
+            <span class="material-icons">expand_more</span>
+          </div>
+          <div class="goal-filter-actions">
+            <span class="goal-badge">길환 나의 목표 가중치</span>
+            <button class="goal-add-btn"><span class="material-icons">add</span>새로운 목표</button>
+          </div>
+        </div>
+        <div class="goal-tabs-row">
+          <div class="goal-tabs">
+            <button class="goal-tab active">전체</button>
+            <button class="goal-tab">팀</button>
+            <button class="goal-tab">나</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 테이블 -->
+      <div class="goal-table-wrap">
+        <table class="goal-table">
+          <thead>
+            <tr>
+              <th>목표</th>
+              <th>상태</th>
+              <th>진행율</th>
+              <th>담당 조직</th>
+              <th>담당자</th>
+              <th>기간</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6">
+                <div class="goal-empty-state">
+                  <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" alt="empty">
+                  <div>만든 목표가 없어요.</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.menu-main').forEach(function(mainBtn) {
+      mainBtn.addEventListener('click', function(e) {
+        // 화살표 span
+        const arrow = mainBtn.querySelector('.arrow');
+        // 바로 다음 .menu-sub
+        const subMenu = mainBtn.parentElement.querySelector('.menu-sub');
+        if (subMenu) {
+          const isOpen = !subMenu.classList.contains('hide');
+          if (isOpen) {
+            subMenu.classList.add('hide');
+            arrow.style.transform = 'rotate(-90deg)';
+          } else {
+            subMenu.classList.remove('hide');
+            arrow.style.transform = 'rotate(0deg)';
+          }
+        }
+      });
+    });
+
+    // 햄버거 메뉴/오버레이 사이드바
+    const hamburger = document.getElementById('hamburger-menu');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    function openSidebar() {
+      sidebar.classList.add('sidebar-mobile', 'open');
+      overlay.style.display = 'block';
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.style.display = 'none';
+    }
+    if (hamburger && sidebar && overlay) {
+      hamburger.addEventListener('click', openSidebar);
+      overlay.addEventListener('click', closeSidebar);
+    }
+    // 태블릿 이하에서만 햄버거 보이게
+    function handleResize() {
+      if (window.innerWidth <= 1024) {
+        hamburger.style.display = 'inline-flex';
+        sidebar.classList.add('sidebar-mobile');
+      } else {
+        hamburger.style.display = 'none';
+        sidebar.classList.remove('sidebar-mobile', 'open');
+        overlay.style.display = 'none';
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    handleResize();
+  });
+  </script>
+</body>
+</html>
