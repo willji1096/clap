@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -8,19 +8,22 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="styles.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     /* 클랩 피드 관련 스타일 전부 삭제함 */
-    .right-panel { width: 300px; background: #ffffff; padding: 36px 24px 32px 24px; border-left: 1px solid #f1f3f5; display: flex; flex-direction: column; gap: 32px; }
-    .right-section { display: flex; flex-direction: column; }
+    .right-panel { width: 300px; background: #ffffff; padding: 36px 24px 32px 24px; border-left: 1px solid #f1f3f5; display: flex; flex-direction: column; gap: 20px; }
+    .right-section { display: flex; flex-direction: column; padding-bottom: 20px; border-bottom: 1px solid #f1f3f5; }
+    .right-section:last-child { border-bottom: none; padding-bottom: 0; }
     .right-value { font-size: 20px; font-weight: 800; color: #2563eb; }
     .right-list { display: flex; flex-direction: column; gap: 4px; }
     .right-list-item { font-size: 14px; color: #444; }
     @media (max-width: 900px) { .right-panel { display: none; } }
     .reward-header { width: 100%; max-width: 100%; margin-left: 0; box-sizing: border-box; }
     .reward-header-title { font-size: 24px; font-weight: 700; color: #222; margin-bottom: 42px; text-align: left; }
-    .reward-tabs-wrap { position: relative; width: 100%; margin-top: 4px; margin-bottom: 48px; padding-bottom: 6px; }
-    .reward-tabs { display: flex; gap: 32px; align-items: flex-end; position: relative; z-index: 2; padding-bottom: 6px; }
-    .reward-tab { background: none; border: none; font-size: 18px; color: #bbb; font-weight: 600; cursor: pointer; padding: 0 4px 0 0; outline: none; transition: color 0.2s; padding-bottom: 6px; }
+    .reward-tabs-wrap { position: relative; width: 100%; margin-top: 4px; margin-bottom: 42px; padding-bottom: 6px; }
+    .reward-tabs { display: flex; justify-content: space-between; align-items: flex-end; position: relative; z-index: 2; padding-bottom: 6px; }
+    .reward-tabs-left { display: flex; gap: 32px; }
+    .reward-tab { background: none; border: none; font-size: 16px; color: #bbb; font-weight: 600; cursor: pointer; padding: 0 4px 0 0; outline: none; transition: color 0.2s; padding-bottom: 6px; }
     .reward-tab.active { color: #222; font-weight: 600; }
     .reward-tabs-active-underline { position: absolute; height: 2px; background: var(--primary-blue, #4f8cff); bottom: -6px; left: 0; z-index: 10; transition: all 0.2s; display: block; }
     .reward-tabs-underline { width: 100%; height: 2px; background: #F4F4F4; position: absolute; left: 0; bottom: 0; z-index: 1; }
@@ -29,6 +32,278 @@
     .reward-tabs-active-underline { background: var(--primary-blue); }
     .right-profile-img-wrap { position: relative; display: inline-block; }
     .right-profile-emoji { position: absolute; right: 0; bottom: 0; font-size: 18px; background: #fff; border-radius: 50%; padding: 1px 2px; }
+    /* 멤버 프로필 모달 스타일 */
+    .member-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .member-profile-img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .member-profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .member-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: #222;
+    }
+    .member-role {
+      font-size: 14px;
+      color: #666;
+    }
+    .member-stats {
+      display: flex;
+      margin-top: 12px;
+      padding: 8px 0;
+      background: #f8f9fa;
+      border-radius: 6px;
+      width: 100%;
+    }
+    .member-stat-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 12px;
+    }
+    .member-stat-item:first-child {
+      border-right: 1px solid #e5e7eb;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 2px;
+    }
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2563eb;
+    }
+    .history-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 16px;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .history-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #666;
+    }
+    .history-message {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.4;
+    }
+    .right-profile-img-wrap {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .right-profile-img-wrap:hover {
+      transform: scale(1.05);
+    }
+    /* 멤버 탭 스타일 */
+    .member-tabs-wrap {
+      border-bottom: 1px solid #eee;
+    }
+    .member-tabs {
+      display: flex;
+      gap: 24px;
+    }
+    .member-tab {
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: #bbb;
+      font-weight: 500;
+      padding: 8px 4px;
+      cursor: pointer;
+      position: relative;
+    }
+    .member-tab.active {
+      color: var(--primary-blue);
+      font-weight: 600;
+    }
+    .member-tab.active:after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--primary-blue);
+    }
+    .clap-modal-content {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      min-width: 340px;
+      width: 640px;
+      height: 700px;
+      max-width: 96vw;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+    }
+    
+    .clap-modal-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .member-tab-content {
+      flex: 1;
+      overflow: auto;
+      height: 500px;
+      padding: 0;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px 0;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    /* 네트워크 그래프 스타일 */
+    .network-container {
+      width: 100%;
+      height: 500px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .network-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .network-node {
+      cursor: pointer;
+    }
+
+    .network-node circle {
+      fill: #fff;
+      stroke: #4f8cff;
+      stroke-width: 3px;
+    }
+
+    .network-node image {
+      pointer-events: none;
+    }
+
+    .network-node text {
+      font-size: 12px;
+      fill: #666;
+      text-anchor: middle;
+      pointer-events: none;
+      font-weight: 500;
+    }
+
+    .network-link {
+      stroke: #e5e7eb;
+      stroke-width: 2;
+      stroke-opacity: 0.8;
+    }
+
+    .network-stats {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .member-tabs-wrap {
+      border-bottom: 1px solid #eee;
+      margin: 24px 0 0 0;
+      flex-shrink: 0;
+    }
+
+    .member-profile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    /* 클랩 모달 스타일 오버라이드 */
+    #clapModal .clap-modal-content {
+      width: 360px;
+    }
+
+    .network-filter {
+      padding: 0 0 16px 0;
+    }
+
+    .network-project-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .network-project-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #333;
+      background-color: #fff;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+    }
+
+    .network-project-select:focus {
+      outline: none;
+      border-color: #e5e7eb;
+    }
   </style>
 </head>
 <body>
@@ -39,9 +314,8 @@
     </div>
     <div class="topbar-right">
         <span class="topbar-icon"><img src="assets/clap.svg" class="clap-svg-icon" alt="박수"></span>
-      <span class="topbar-icon material-icons">school</span>
-
-      <span class="topbar-icon"><span class="material-icons">notifications_none</span></span>
+        <span class="topbar-icon material-icons">school</span>
+        <span class="topbar-icon"><span class="material-icons">notifications_none</span></span>
 
       <div class="topbar-profile">
         <img class="profile-circle" src="https://i.pravatar.cc/150?img=3" alt="프로필" />
@@ -148,8 +422,11 @@
         <div class="reward-header-title">클랩 보드</div>
         <div class="reward-tabs-wrap">
           <div class="reward-tabs">
-            <button class="reward-tab active" data-tab="received">받은 클랩</button>
-            <button class="reward-tab" data-tab="sent">보낸 클랩</button>
+            <div class="reward-tabs-left">
+              <button class="reward-tab active" data-tab="received">받은 클랩</button>
+              <button class="reward-tab" data-tab="sent">보낸 클랩</button>
+            </div>
+            <button class="clap-btn clap-btn-reply">클랩 한줄평 보내기</button>
             <div class="reward-tabs-active-underline"></div>
           </div>
           <div class="reward-tabs-underline"></div>
@@ -157,7 +434,10 @@
       </div>
       <div class="clap-list" data-tab="received">
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/1.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="1" data-name="이수진" data-role="디자인팀 · 시니어" data-clap-count="15">
+            <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">이수진</span><span class="clap-role">디자인팀 · 시니어</span><span class="clap-time">방금 전</span></div>
             <div class="clap-message">새로운 아이디어 정말 멋졌어요! 팀에 큰 영감을 주셨어요 🙌</div>
@@ -166,16 +446,22 @@
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/2.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="2" data-name="김서연" data-role="개발팀 · 프론트엔드" data-clap-count="12">
+            <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
-            <div class="clap-meta-row"><span class="clap-name">박지훈</span><span class="clap-role">개발팀 · 프론트엔드</span><span class="clap-time">5분 전</span></div>
+            <div class="clap-meta-row"><span class="clap-name">김서연</span><span class="clap-role">개발팀 · 프론트엔드</span><span class="clap-time">5분 전</span></div>
             <div class="clap-message">버그 빠르게 잡아줘서 고마워요! 덕분에 일정 맞췄어요.</div>
             <div class="clap-tags-row"><span class="clap-tag">#개발</span><span class="clap-tag">#문제해결</span></div>
             <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/3.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="3" data-name="최민수" data-role="QA · 매니저" data-clap-count="18">
+            <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">최민수</span><span class="clap-role">QA · 매니저</span><span class="clap-time">30분 전</span></div>
             <div class="clap-message">테스트 케이스 꼼꼼하게 챙겨줘서 프로젝트가 한층 안정적이 됐어요.</div>
@@ -184,7 +470,10 @@
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/4.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="4" data-name="김하늘" data-role="마케팅팀 · 팀장" data-clap-count="14">
+            <img src="https://randomuser.me/api/portraits/women/4.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">김하늘</span><span class="clap-role">마케팅팀 · 팀장</span><span class="clap-time">1시간 전</span></div>
             <div class="clap-message">캠페인 결과가 기대 이상이었어요! 정말 수고 많으셨습니다 🎉</div>
@@ -193,7 +482,10 @@
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/5.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="5" data-name="이정훈" data-role="운영팀 · 주니어" data-clap-count="9">
+            <img src="https://randomuser.me/api/portraits/men/5.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">이정훈</span><span class="clap-role">운영팀 · 주니어</span><span class="clap-time">2시간 전</span></div>
             <div class="clap-message">긴급 이슈 빠르게 처리해줘서 정말 고마워요!</div>
@@ -202,7 +494,10 @@
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/6.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="6" data-name="정유진" data-role="기획팀 · PM" data-clap-count="16">
+            <img src="https://randomuser.me/api/portraits/women/6.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">정유진</span><span class="clap-role">기획팀 · PM</span><span class="clap-time">3시간 전</span></div>
             <div class="clap-message">새로운 플로우 제안 덕분에 프로젝트가 훨씬 매끄러워졌어요.</div>
@@ -211,7 +506,10 @@
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/7.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="7" data-name="한지훈" data-role="개발팀 · 백엔드" data-clap-count="13">
+            <img src="https://randomuser.me/api/portraits/men/7.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">한지훈</span><span class="clap-role">개발팀 · 백엔드</span><span class="clap-time">4시간 전</span></div>
             <div class="clap-message">API 문서화 꼼꼼하게 해줘서 협업이 쉬워졌어요.</div>
@@ -220,33 +518,48 @@
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/8.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="8" data-name="오지은" data-role="QA · 주니어" data-clap-count="11">
+            <img src="https://randomuser.me/api/portraits/women/8.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">오지은</span><span class="clap-role">QA · 주니어</span><span class="clap-time">5시간 전</span></div>
             <div class="clap-message">테스트 자동화 도입 제안 정말 좋았어요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#자동화</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/9.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="9" data-name="김태현" data-role="운영팀 · 매니저" data-clap-count="17">
+            <img src="https://randomuser.me/api/portraits/men/9.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">김태현</span><span class="clap-role">운영팀 · 매니저</span><span class="clap-time">6시간 전</span></div>
             <div class="clap-message">팀 분위기 좋게 만들어줘서 항상 고마워요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#분위기메이커</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/10.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="10" data-name="박지수" data-role="마케팅팀 · 주니어" data-clap-count="10">
+            <img src="https://randomuser.me/api/portraits/women/10.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">박지수</span><span class="clap-role">마케팅팀 · 주니어</span><span class="clap-time">7시간 전</span></div>
             <div class="clap-message">SNS 홍보 아이디어 덕분에 팔로워가 확 늘었어요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#SNS</span></div>
+            <div class="clap-actions-row"><button class="clap-btn clap-btn-reply">감사 답장</button></div>
           </div>
         </div>
       </div>
       <div class="clap-list" data-tab="sent" style="display:none;">
         <div class="clap-item" data-name="이상훈" data-team="개발팀" data-keywords="#리뷰,#개발" data-message="코드 리뷰 꼼꼼하게 해줘서 고마워요!">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/11.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="11" data-name="이상훈" data-role="개발팀 · 시니어" data-clap-count="8">
+            <img src="https://randomuser.me/api/portraits/men/11.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">이상훈</span><span class="clap-role">개발팀 · 시니어</span><span class="clap-time">1일 전</span></div>
             <div class="clap-message">코드 리뷰 꼼꼼하게 해줘서 고마워요!</div>
@@ -258,48 +571,78 @@
           </div>
         </div>
         <div class="clap-item" data-name="최유리" data-team="디자인팀" data-keywords="#디자인,#프로토타입" data-message="프로토타입 빠르게 만들어줘서 일정이 단축됐어요!">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/12.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="12" data-name="최유리" data-role="디자인팀 · 주니어" data-clap-count="7">
+            <img src="https://randomuser.me/api/portraits/women/12.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">최유리</span><span class="clap-role">디자인팀 · 주니어</span><span class="clap-time">1일 전</span></div>
             <div class="clap-message">프로토타입 빠르게 만들어줘서 일정이 단축됐어요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#디자인</span><span class="clap-tag">#프로토타입</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item" data-name="정재훈" data-team="QA" data-keywords="#QA,#자동화" data-message="테스트 자동화 스크립트 공유해줘서 큰 도움 됐어요.">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/13.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="13" data-name="정재훈" data-role="QA · 시니어" data-clap-count="15">
+            <img src="https://randomuser.me/api/portraits/men/13.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">정재훈</span><span class="clap-role">QA · 시니어</span><span class="clap-time">2일 전</span></div>
             <div class="clap-message">테스트 자동화 스크립트 공유해줘서 큰 도움 됐어요.</div>
             <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#자동화</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item" data-name="김지연" data-team="마케팅팀" data-keywords="#마케팅,#아이디어" data-message="신규 캠페인 아이디어 정말 신선했어요!">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/14.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="14" data-name="김지연" data-role="마케팅팀 · 매니저" data-clap-count="19">
+            <img src="https://randomuser.me/api/portraits/women/14.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">김지연</span><span class="clap-role">마케팅팀 · 매니저</span><span class="clap-time">2일 전</span></div>
             <div class="clap-message">신규 캠페인 아이디어 정말 신선했어요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#아이디어</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/men/15.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="15" data-name="박성호" data-role="운영팀 · 주니어" data-clap-count="6">
+            <img src="https://randomuser.me/api/portraits/men/15.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">박성호</span><span class="clap-role">운영팀 · 주니어</span><span class="clap-time">3일 전</span></div>
             <div class="clap-message">고객 문의 빠르게 처리해줘서 고마워요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#고객지원</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item">
-          <div class="clap-profile"><img src="https://randomuser.me/api/portraits/women/16.jpg" alt="프로필"><span class="clap-icon">👏</span></div>
+          <div class="clap-profile right-profile-img-wrap" data-member-id="16" data-name="이은지" data-role="기획팀 · PM" data-clap-count="14">
+            <img src="https://randomuser.me/api/portraits/women/16.jpg" alt="프로필" class="right-profile-img">
+            <span class="clap-icon">👏</span>
+          </div>
           <div class="clap-info">
             <div class="clap-meta-row"><span class="clap-name">이은지</span><span class="clap-role">기획팀 · PM</span><span class="clap-time">3일 전</span></div>
             <div class="clap-message">프로젝트 일정 관리 정말 잘해주셨어요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#기획</span><span class="clap-tag">#일정관리</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item">
@@ -308,7 +651,10 @@
             <div class="clap-meta-row"><span class="clap-name">최현우</span><span class="clap-role">개발팀 · 주니어</span><span class="clap-time">4일 전</span></div>
             <div class="clap-message">코드 리팩토링 제안 덕분에 성능이 좋아졌어요.</div>
             <div class="clap-tags-row"><span class="clap-tag">#개발</span><span class="clap-tag">#리팩토링</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item">
@@ -317,7 +663,10 @@
             <div class="clap-meta-row"><span class="clap-name">박소영</span><span class="clap-role">QA · 주니어</span><span class="clap-time">5일 전</span></div>
             <div class="clap-message">테스트 문서화 정말 꼼꼼하게 해줘서 고마워요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#QA</span><span class="clap-tag">#문서화</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item">
@@ -326,7 +675,10 @@
             <div class="clap-meta-row"><span class="clap-name">이재훈</span><span class="clap-role">운영팀 · 매니저</span><span class="clap-time">5일 전</span></div>
             <div class="clap-message">팀원들 챙겨줘서 항상 고마워요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#운영</span><span class="clap-tag">#팀워크</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
         <div class="clap-item">
@@ -335,7 +687,10 @@
             <div class="clap-meta-row"><span class="clap-name">정다은</span><span class="clap-role">마케팅팀 · 시니어</span><span class="clap-time">6일 전</span></div>
             <div class="clap-message">SNS 홍보 전략 정말 인상적이었어요!</div>
             <div class="clap-tags-row"><span class="clap-tag">#마케팅</span><span class="clap-tag">#SNS</span></div>
-            <div class="clap-actions-row"><button class="clap-btn clap-btn-edit">수정</button></div>
+            <div class="clap-actions-row">
+              <button class="clap-btn clap-btn-edit">수정</button>
+              <button class="clap-btn clap-btn-cancel">취소</button>
+            </div>
           </div>
         </div>
       </div>
@@ -344,23 +699,47 @@
       <div class="right-section">
         <div class="right-label">이번주 클랩 한줄평 리더</div>
         <div class="right-profile-row">
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=5" class="right-profile-img" /><span class="right-profile-emoji">👏</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=6" class="right-profile-img" /><span class="right-profile-emoji">👏</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=7" class="right-profile-img" /><span class="right-profile-emoji">👏</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=10" class="right-profile-img" /><span class="right-profile-emoji">👏</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=11" class="right-profile-img" /><span class="right-profile-emoji">👏</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=12" class="right-profile-img" /><span class="right-profile-emoji">👏</span></div>
+          <div class="right-profile-img-wrap" data-member-id="5" data-name="김서연" data-role="디자인팀 · 시니어" data-clap-count="23">
+            <img src="https://i.pravatar.cc/100?img=5" class="right-profile-img"><span class="right-profile-emoji">👏</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="6" data-name="이준호" data-role="개발팀 · 프론트엔드" data-clap-count="21">
+            <img src="https://i.pravatar.cc/100?img=6" class="right-profile-img"><span class="right-profile-emoji">👏</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="7" data-name="박민지" data-role="기획팀 · PM" data-clap-count="19">
+            <img src="https://i.pravatar.cc/100?img=7" class="right-profile-img"><span class="right-profile-emoji">👏</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="10" data-name="정태우" data-role="개발팀 · 백엔드" data-clap-count="18">
+            <img src="https://i.pravatar.cc/100?img=10" class="right-profile-img"><span class="right-profile-emoji">👏</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="11" data-name="최유진" data-role="마케팅팀 · 매니저" data-clap-count="17">
+            <img src="https://i.pravatar.cc/100?img=11" class="right-profile-img"><span class="right-profile-emoji">👏</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="12" data-name="한승민" data-role="운영팀 · 시니어" data-clap-count="16">
+            <img src="https://i.pravatar.cc/100?img=12" class="right-profile-img"><span class="right-profile-emoji">👏</span>
+          </div>
         </div>
       </div>
       <div class="right-section">
         <div class="right-label">클랩 한줄평이 필요한 동료</div>
         <div class="right-profile-row">
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=8" class="right-profile-img" /><span class="right-profile-emoji">💬</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=9" class="right-profile-img" /><span class="right-profile-emoji">💬</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=13" class="right-profile-img" /><span class="right-profile-emoji">💬</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=14" class="right-profile-img" /><span class="right-profile-emoji">💬</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=15" class="right-profile-img" /><span class="right-profile-emoji">💬</span></div>
-          <div class="right-profile-img-wrap"><img src="https://i.pravatar.cc/100?img=16" class="right-profile-img" /><span class="right-profile-emoji">💬</span></div>
+          <div class="right-profile-img-wrap" data-member-id="8" data-name="임수진" data-role="디자인팀 · 주니어" data-clap-count="0">
+            <img src="https://i.pravatar.cc/100?img=8" class="right-profile-img"><span class="right-profile-emoji">💬</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="9" data-name="강동현" data-role="개발팀 · 인턴" data-clap-count="1">
+            <img src="https://i.pravatar.cc/100?img=9" class="right-profile-img"><span class="right-profile-emoji">💬</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="13" data-name="송지원" data-role="기획팀 · 주니어" data-clap-count="2">
+            <img src="https://i.pravatar.cc/100?img=13" class="right-profile-img"><span class="right-profile-emoji">💬</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="14" data-name="오현우" data-role="QA · 시니어" data-clap-count="1">
+            <img src="https://i.pravatar.cc/100?img=14" class="right-profile-img"><span class="right-profile-emoji">💬</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="15" data-name="윤서아" data-role="마케팅팀 · 주니어" data-clap-count="0">
+            <img src="https://i.pravatar.cc/100?img=15" class="right-profile-img"><span class="right-profile-emoji">💬</span>
+          </div>
+          <div class="right-profile-img-wrap" data-member-id="16" data-name="장민석" data-role="운영팀 · 매니저" data-clap-count="2">
+            <img src="https://i.pravatar.cc/100?img=16" class="right-profile-img"><span class="right-profile-emoji">💬</span>
+          </div>
         </div>
       </div>
       <div class="right-section">
@@ -450,5 +829,493 @@
       </div>
     </div>
   </div>
+  <!-- 멤버 프로필 모달 -->
+  <div id="memberModal" class="clap-modal" style="display:none;">
+    <div class="clap-modal-overlay"></div>
+    <div class="clap-modal-content">
+      <div class="clap-modal-header">
+        <span class="clap-modal-title">멤버 프로필</span>
+        <button class="clap-modal-close" title="닫기">×</button>
+      </div>
+      <div class="clap-modal-body">
+        <div class="member-profile-header">
+          <img class="member-profile-img" src="" alt="프로필">
+          <div class="member-profile-info">
+            <div class="member-name"></div>
+            <div class="member-role"></div>
+            <div class="member-stats">
+              <div class="member-stat-item">
+                <div class="stat-label">총 받은 수</div>
+                <div class="stat-value clap-count">15</div>
+              </div>
+              <div class="member-stat-item">
+                <div class="stat-label">총 보낸 수</div>
+                <div class="stat-value">12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="member-tabs-wrap">
+          <div class="member-tabs">
+            <button class="member-tab active" data-tab="received">받은 클랩 한줄평</button>
+            <button class="member-tab" data-tab="sent">보낸 클랩 한줄평</button>
+            <button class="member-tab" data-tab="network">네트워크</button>
+          </div>
+        </div>
+
+        <div class="member-tab-content" data-tab="received" style="display: block;">
+          <div class="history-list">
+            <div class="history-item">
+              <div class="history-meta">
+                <span>김태현 · 운영팀 · 매니저</span>
+                <span>방금 전</span>
+              </div>
+              <div class="history-message">디자인 시스템 개선 제안 감사합니다!</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>박민지 · 기획팀 · PM</span>
+                <span>3일 전</span>
+              </div>
+              <div class="history-message">UI 개선 아이디어 정말 좋았어요.</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>정태우 · 개발팀 · 백엔드</span>
+                <span>4일 전</span>
+              </div>
+              <div class="history-message">협업하기 정말 좋은 동료예요.</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>한승민 · 운영팀 · 시니어</span>
+                <span>5일 전</span>
+              </div>
+              <div class="history-message">새로운 기능 제안 감사합니다.</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>임수진 · 디자인팀 · 주니어</span>
+                <span>1주일 전</span>
+              </div>
+              <div class="history-message">멘토링 감사합니다!</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="member-tab-content" data-tab="sent" style="display: none;">
+          <div class="history-list">
+            <div class="history-item">
+              <div class="history-meta">
+                <span>이준호 · 개발팀 · 백엔드</span>
+                <span>방금 전</span>
+              </div>
+              <div class="history-message">코드 리뷰 피드백 감사합니다!</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>김서연 · 디자인팀 · 시니어</span>
+                <span>2일 전</span>
+              </div>
+              <div class="history-message">디자인 시스템 제안이 인상적이었어요.</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>박지원 · 기획팀 · PM</span>
+                <span>3일 전</span>
+              </div>
+              <div class="history-message">프로젝트 일정 관리 감사합니다.</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>최민수 · QA · 매니저</span>
+                <span>4일 전</span>
+              </div>
+              <div class="history-message">테스트 자동화 도입 제안 좋았어요!</div>
+            </div>
+            <div class="history-item">
+              <div class="history-meta">
+                <span>정유진 · 마케팅팀 · 주니어</span>
+                <span>1주일 전</span>
+              </div>
+              <div class="history-message">캠페인 아이디어 감사합니다.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="member-tab-content" data-tab="network" style="display: none;">
+          <div class="network-filter">
+            <div class="network-project-title">참여 프로젝트 조회</div>
+            <select class="network-project-select">
+              <option value="all">전체 프로젝트</option>
+              <option value="project1">리워드 스토어 개편</option>
+              <option value="project2">모바일 앱 런칭</option>
+              <option value="project3">신규 평가 시스템</option>
+              <option value="project4">클랩 보드 개발</option>
+            </select>
+          </div>
+          <div class="network-container">
+            <svg class="network-svg"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // 멤버 프로필 탭 전환
+    document.addEventListener('DOMContentLoaded', function() {
+      const memberTabs = document.querySelectorAll('.member-tab');
+      const memberContents = document.querySelectorAll('.member-tab-content');
+
+      memberTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.getAttribute('data-tab');
+
+          // 탭 활성화
+          memberTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          // 컨텐츠 전환
+          memberContents.forEach(content => {
+            if (content.getAttribute('data-tab') === targetTab) {
+              content.style.display = 'block';
+              if (targetTab === 'network') {
+                setTimeout(() => {
+                  initNetworkGraph();
+                }, 100);
+              }
+            } else {
+              content.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
+
+    // 프로젝트별 네트워크 데이터
+    const projectNetworks = {
+      all: {
+        nodes: [
+          // UI/UX 클러스터
+          { id: "user1", name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀" },
+          { id: "user2", name: "이지원", avatar: "https://randomuser.me/api/portraits/women/7.jpg", team: "디자인팀" },
+          { id: "user3", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
+          { id: "user4", name: "오지은", avatar: "https://randomuser.me/api/portraits/women/11.jpg", team: "디자인팀" },
+
+          // 백엔드 클러스터
+          { id: "user5", name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀" },
+          { id: "user6", name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀" },
+          { id: "user7", name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀" },
+          { id: "user8", name: "김태현", avatar: "https://randomuser.me/api/portraits/men/12.jpg", team: "개발팀" },
+
+          // 기획/마케팅 클러스터
+          { id: "user9", name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀" },
+          { id: "user10", name: "임준호", avatar: "https://randomuser.me/api/portraits/men/10.jpg", team: "마케팅팀" },
+          { id: "user11", name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀" },
+          { id: "user12", name: "최유리", avatar: "https://randomuser.me/api/portraits/women/15.jpg", team: "마케팅팀" },
+
+          // 운영/QA 클러스터
+          { id: "user13", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" },
+          { id: "user14", name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀" },
+          { id: "user15", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" }
+        ],
+        links: [
+          // UI/UX 클러스터 내부 연결
+          { source: "user1", target: "user2", value: 8 },
+          { source: "user1", target: "user3", value: 7 },
+          { source: "user1", target: "user4", value: 8 },
+          { source: "user2", target: "user3", value: 7 },
+          { source: "user2", target: "user4", value: 8 },
+          { source: "user3", target: "user4", value: 7 },
+
+          // 백엔드 클러스터 내부 연결
+          { source: "user5", target: "user6", value: 8 },
+          { source: "user5", target: "user7", value: 7 },
+          { source: "user5", target: "user8", value: 8 },
+          { source: "user6", target: "user7", value: 8 },
+          { source: "user6", target: "user8", value: 7 },
+          { source: "user7", target: "user8", value: 8 },
+
+          // 기획/마케팅 클러스터 내부 연결
+          { source: "user9", target: "user10", value: 8 },
+          { source: "user9", target: "user11", value: 7 },
+          { source: "user9", target: "user12", value: 8 },
+          { source: "user10", target: "user11", value: 7 },
+          { source: "user10", target: "user12", value: 8 },
+          { source: "user11", target: "user12", value: 7 },
+
+          // 운영/QA 클러스터 내부 연결
+          { source: "user13", target: "user14", value: 8 },
+          { source: "user13", target: "user15", value: 7 },
+          { source: "user14", target: "user15", value: 8 },
+
+          // 클러스터 간 연결 (브릿지)
+          { source: "user1", target: "user5", value: 5 }, // UI/UX - 백엔드
+          { source: "user5", target: "user9", value: 5 }, // 백엔드 - 기획/마케팅
+          { source: "user9", target: "user13", value: 5 }, // 기획/마케팅 - 운영/QA
+          { source: "user13", target: "user1", value: 5 }, // 운영/QA - UI/UX
+
+          // 추가 클러스터 간 약한 연결
+          { source: "user3", target: "user7", value: 4 },
+          { source: "user8", target: "user11", value: 4 },
+          { source: "user4", target: "user15", value: 4 },
+          { source: "user6", target: "user12", value: 4 }
+        ]
+      },
+      project1: {
+        nodes: [
+          // 리워드 스토어 개편 프로젝트
+          { id: "user1", name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀" },
+          { id: "user2", name: "이지원", avatar: "https://randomuser.me/api/portraits/women/7.jpg", team: "디자인팀" },
+          { id: "user3", name: "오지은", avatar: "https://randomuser.me/api/portraits/women/11.jpg", team: "디자인팀" },
+          { id: "user4", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" },
+          { id: "user5", name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀" },
+          { id: "user6", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
+          { id: "user7", name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀" }
+        ],
+        links: [
+          // 디자인팀 내부 연결
+          { source: "user1", target: "user2", value: 8 },
+          { source: "user1", target: "user3", value: 7 },
+          { source: "user2", target: "user3", value: 8 },
+
+          // 개발팀 내부 연결
+          { source: "user4", target: "user5", value: 8 },
+
+          // 기획팀 내부 연결
+          { source: "user6", target: "user7", value: 8 },
+
+          // 팀 간 연결
+          { source: "user1", target: "user4", value: 6 },
+          { source: "user2", target: "user5", value: 6 },
+          { source: "user3", target: "user6", value: 6 },
+          { source: "user4", target: "user6", value: 6 },
+          { source: "user5", target: "user7", value: 6 }
+        ]
+      },
+      project2: {
+        nodes: [
+          // 모바일 앱 런칭 프로젝트
+          { id: "user1", name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀" },
+          { id: "user2", name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀" },
+          { id: "user3", name: "김태현", avatar: "https://randomuser.me/api/portraits/men/12.jpg", team: "개발팀" },
+          { id: "user4", name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀" },
+          { id: "user5", name: "임준호", avatar: "https://randomuser.me/api/portraits/men/10.jpg", team: "마케팅팀" },
+          { id: "user6", name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀" },
+          { id: "user7", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" },
+          { id: "user8", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" }
+        ],
+        links: [
+          // 개발팀 내부 연결
+          { source: "user1", target: "user2", value: 8 },
+          { source: "user1", target: "user3", value: 7 },
+          { source: "user2", target: "user3", value: 8 },
+          { source: "user1", target: "user8", value: 7 },
+          { source: "user2", target: "user8", value: 8 },
+          { source: "user3", target: "user8", value: 7 },
+
+          // 마케팅팀 내부 연결
+          { source: "user4", target: "user5", value: 8 },
+
+          // 팀 간 연결
+          { source: "user1", target: "user6", value: 6 },
+          { source: "user2", target: "user4", value: 6 },
+          { source: "user3", target: "user7", value: 6 },
+          { source: "user4", target: "user6", value: 6 },
+          { source: "user5", target: "user7", value: 6 }
+        ]
+      },
+      project3: {
+        nodes: [
+          // 신규 평가 시스템 프로젝트
+          { id: "user1", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
+          { id: "user2", name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀" },
+          { id: "user3", name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀" },
+          { id: "user4", name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀" },
+          { id: "user5", name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀" },
+          { id: "user6", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" },
+          { id: "user7", name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀" }
+        ],
+        links: [
+          // 기획팀 내부 연결
+          { source: "user1", target: "user2", value: 8 },
+          { source: "user1", target: "user7", value: 7 },
+          { source: "user2", target: "user7", value: 8 },
+
+          // 개발팀 내부 연결
+          { source: "user3", target: "user4", value: 8 },
+
+          // 팀 간 연결
+          { source: "user1", target: "user3", value: 6 },
+          { source: "user2", target: "user4", value: 6 },
+          { source: "user3", target: "user5", value: 6 },
+          { source: "user4", target: "user6", value: 6 },
+          { source: "user5", target: "user7", value: 6 }
+        ]
+      },
+      project4: {
+        nodes: [
+          // 클랩 보드 개발 프로젝트
+          { id: "user1", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" },
+          { id: "user2", name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀" },
+          { id: "user3", name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀" },
+          { id: "user4", name: "이지원", avatar: "https://randomuser.me/api/portraits/women/7.jpg", team: "디자인팀" },
+          { id: "user5", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
+          { id: "user6", name: "최유리", avatar: "https://randomuser.me/api/portraits/women/15.jpg", team: "마케팅팀" },
+          { id: "user7", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" }
+        ],
+        links: [
+          // 개발팀 내부 연결
+          { source: "user1", target: "user2", value: 8 },
+
+          // 디자인팀 내부 연결
+          { source: "user3", target: "user4", value: 8 },
+
+          // 팀 간 연결
+          { source: "user1", target: "user3", value: 6 },
+          { source: "user2", target: "user4", value: 6 },
+          { source: "user3", target: "user5", value: 6 },
+          { source: "user4", target: "user6", value: 6 },
+          { source: "user5", target: "user7", value: 6 }
+        ]
+      }
+    };
+
+    // 네트워크 그래프 초기화 함수 수정
+    function initNetworkGraph(projectId = 'all') {
+      // 기존 SVG 내용 제거
+      d3.select('.network-svg').selectAll('*').remove();
+
+      const { nodes, links } = projectNetworks[projectId];
+      
+      const container = document.querySelector('.network-container');
+      const width = container.offsetWidth;
+      const height = container.offsetHeight;
+
+      const svg = d3.select('.network-svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      // 줌 기능 추가
+      const zoom = d3.zoom()
+        .scaleExtent([0.5, 2])
+        .on('zoom', (event) => {
+          g.attr('transform', event.transform);
+        });
+
+      svg.call(zoom);
+
+      // 중앙에 위치할 그룹 생성
+      const g = svg.append('g')
+        .attr('transform', `translate(${width/2},${height/2})`);
+
+      // Force simulation 설정
+      const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(d => 120 - d.value * 5))
+        .force('charge', d3.forceManyBody().strength(-800))
+        .force('x', d3.forceX().strength(0.08))
+        .force('y', d3.forceY().strength(0.08))
+        .force('collision', d3.forceCollide().radius(50));
+
+      // 링크 그리기
+      const link = g.append('g')
+        .selectAll('line')
+        .data(links)
+        .join('line')
+        .attr('class', 'network-link')
+        .attr('stroke-width', d => Math.sqrt(d.value));
+
+      // 노드 그리기
+      const node = g.append('g')
+        .selectAll('.network-node')
+        .data(nodes)
+        .join('g')
+        .attr('class', 'network-node')
+        .call(d3.drag()
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended));
+
+      // 노드 원 추가
+      node.append('circle')
+        .attr('r', 24)
+        .attr('fill', '#fff')
+        .attr('stroke', d => {
+          switch(d.team) {
+            case '개발팀': return '#4f8cff';
+            case '디자인팀': return '#a3e635';
+            case '기획팀': return '#fb923c';
+            case '마케팅팀': return '#e879f9';
+            case '운영팀': return '#22d3ee';
+            default: return '#94a3b8';
+          }
+        })
+        .attr('stroke-width', 3);
+
+      // 아바타 이미지 추가
+      node.append('image')
+        .attr('x', -22)
+        .attr('y', -22)
+        .attr('width', 44)
+        .attr('height', 44)
+        .attr('clip-path', 'circle(22px)')
+        .attr('href', d => d.avatar)
+        .attr('preserveAspectRatio', 'xMidYMid slice');
+
+      // 이름 텍스트 추가
+      node.append('text')
+        .attr('dy', 40)
+        .text(d => d.name)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#666')
+        .attr('font-size', '12px')
+        .attr('font-weight', '500');
+
+      // Force simulation 업데이트 함수
+      simulation.on('tick', () => {
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+      });
+
+      // 드래그 이벤트 핸들러
+      function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+
+      function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+
+      // 초기 위치 설정을 위해 시뮬레이션 실행
+      simulation.alpha(1).restart();
+    }
+
+    // 프로젝트 선택 이벤트 리스너
+    document.querySelector('.network-project-select').addEventListener('change', (e) => {
+      initNetworkGraph(e.target.value);
+    });
+
+    // 네트워크 탭 클릭 시 그래프 초기화
+    document.querySelector('.member-tab[data-tab="network"]').addEventListener('click', () => {
+      setTimeout(() => {
+        initNetworkGraph(document.querySelector('.network-project-select').value);
+      }, 100);
+    });
+  </script>
 </body>
 </html>
