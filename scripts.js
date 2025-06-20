@@ -274,37 +274,44 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   function openMemberModal(memberId, name, role, clapCount, imgSrc) {
+    memberModal.dataset.currentMemberId = memberId;
     memberProfileImg.src = imgSrc;
     memberName.textContent = name;
     memberRole.textContent = role;
     memberClapCount.textContent = clapCount;
-    
-    // 클랩 히스토리 렌더링
-    historyList.innerHTML = '';
+    // 히스토리 목록 채우기 (일단 더미 데이터 사용)
     const histories = dummyHistories[memberId] || [];
-    histories.forEach(history => {
-      const historyItem = document.createElement('div');
-      historyItem.className = 'history-item';
-      historyItem.innerHTML = `
+    historyList.innerHTML = histories.map(h => `
+      <div class="history-item">
         <div class="history-meta">
-          <span>${history.from} · ${history.role}</span>
-          <span>${history.time}</span>
+          <span>${h.from} · ${h.role}</span>
+          <span>${h.time}</span>
         </div>
-        <div class="history-message">${history.message}</div>
-      `;
-      historyList.appendChild(historyItem);
-    });
+        <div class="history-message">${h.message}</div>
+      </div>
+    `).join('');
 
+    // 네트워크 탭이 기본으로 선택되어 있다면 그래프를 바로 로드
+    if (memberModal.querySelector('.member-tab[data-tab="network"].active')) {
+      populateProjectFilter(memberId);
+      const selectedProject = memberModal.querySelector('.network-project-select').value;
+      initNetworkGraph(selectedProject, memberId);
+    }
+    
     memberModal.style.display = 'flex';
   }
 
   function closeMemberModal() {
     memberModal.style.display = 'none';
+    // 모달이 닫힐 때 네트워크 탭을 비활성화하고 다른 탭을 기본으로 설정
+    memberModal.querySelector('.member-tab[data-tab="network"]').classList.remove('active');
+    memberModal.querySelector('.member-tab[data-tab="received"]').classList.add('active');
+    memberModal.querySelector('.member-tab-content[data-tab="network"]').style.display = 'none';
+    memberModal.querySelector('.member-tab-content[data-tab="received"]').style.display = 'block';
   }
 
-  // 프로필 이미지 클릭 이벤트
-  document.querySelectorAll('.right-profile-img-wrap').forEach(profile => {
-    profile.addEventListener('click', function() {
+  document.querySelectorAll('.right-profile-img-wrap, .clap-profile').forEach(function(el) {
+    el.addEventListener('click', function() {
       const memberId = this.dataset.memberId;
       const name = this.dataset.name;
       const role = this.dataset.role;
@@ -314,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // 모달 닫기 이벤트
+  // 멤버 모달 닫기
   memberModal.querySelector('.clap-modal-close').addEventListener('click', closeMemberModal);
   memberModal.querySelector('.clap-modal-overlay').addEventListener('click', closeMemberModal);
 }); 

@@ -2101,21 +2101,20 @@ body, button, input, select, textarea {
 }
 .right-mission-bar {
   width: 100%;
-  height: 16px;
-  background: #e5e8ed;
-  border-radius: 8px;
+  height: 8px;
+  background-color: #f1f3f5;
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 0;
 }
 .right-mission-bar-fill {
   height: 100%;
-  background: #2563eb;
-  border-radius: 8px;
+  background-color: var(--primary-blue, #4f8cff);
+  border-radius: 4px;
   width: 0;
-  transition: width 0.4s;
+  transition: width 0.3s ease-in-out;
 }
 .right-mission-bar-fill.complete {
-  background: #22b573;
+  background-color: #22b573;
 }
 .right-mission-status {
   font-size: 12px;
@@ -2310,36 +2309,38 @@ body, button, input, select, textarea {
 }
 .right-mission-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
   margin-bottom: 8px;
 }
 .right-mission-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #222;
-  letter-spacing: -0.2px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
 }
 .right-mission-percent {
   font-size: 13px;
-  color: #2563eb;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--primary-blue, #4f8cff);
+}
+.right-mission-progress {
+  width: 100%;
 }
 .right-mission-bar {
   width: 100%;
-  height: 16px;
-  background: #e5e8ed;
-  border-radius: 8px;
+  height: 8px;
+  background-color: #f1f3f5;
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 0;
 }
 .right-mission-bar-fill {
-  height: 100%;
-  background: #2563eb;
-  border-radius: 8px;
   width: 0;
-  transition: width 0.4s;
+  height: 100%;
+  background-color: var(--primary-blue, #4f8cff);
+  border-radius: 4px;
+  transition: width 0.3s ease-in-out;
 }
 .right-mission-bar-fill.complete {
-  background: #22b573;
+  background-color: #22b573;
 }

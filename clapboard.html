@@ -228,7 +228,6 @@
 
     .network-node circle {
       fill: #fff;
-      stroke: #4f8cff;
       stroke-width: 3px;
     }
 
@@ -303,6 +302,19 @@
     .network-project-select:focus {
       outline: none;
       border-color: #e5e7eb;
+    }
+
+    #network-tooltip {
+      position: absolute;
+      background-color: rgba(30, 41, 59, 0.9);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 10;
+      transition: opacity 0.2s;
     }
   </style>
 </head>
@@ -948,15 +960,12 @@
           <div class="network-filter">
             <div class="network-project-title">참여 프로젝트 조회</div>
             <select class="network-project-select">
-              <option value="all">전체 프로젝트</option>
-              <option value="project1">리워드 스토어 개편</option>
-              <option value="project2">모바일 앱 런칭</option>
-              <option value="project3">신규 평가 시스템</option>
-              <option value="project4">클랩 보드 개발</option>
+              <!-- 프로젝트 목록은 동적으로 채워집니다. -->
             </select>
           </div>
           <div class="network-container">
             <svg class="network-svg"></svg>
+            <div id="network-tooltip" style="display: none;"></div>
           </div>
         </div>
       </div>
@@ -981,9 +990,12 @@
             if (content.getAttribute('data-tab') === targetTab) {
               content.style.display = 'block';
               if (targetTab === 'network') {
-                setTimeout(() => {
-                  initNetworkGraph();
-                }, 100);
+                const currentMemberId = document.getElementById('memberModal').dataset.currentMemberId;
+                if(currentMemberId) {
+                  populateProjectFilter(currentMemberId);
+                  const selectedProject = document.querySelector('.network-project-select').value;
+                  initNetworkGraph(selectedProject, currentMemberId);
+                }
               }
             } else {
               content.style.display = 'none';
@@ -993,255 +1005,164 @@
       });
     });
 
-    // 프로젝트별 네트워크 데이터
+    // 중앙 관리형 멤버 데이터
+    const members = {
+      1: { id: 1, name: "이수진", avatar: "https://randomuser.me/api/portraits/women/33.jpg", team: "디자인팀", role: "시니어 디자이너" },
+      2: { id: 2, name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀", role: "UI/UX 디자이너" },
+      3: { id: 3, name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀", role: "프로덕트 매니저" },
+      4: { id: 4, name: "오지은", avatar: "https://randomuser.me/api/portraits/women/11.jpg", team: "디자인팀", role: "주니어 디자이너" },
+      5: { id: 5, name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀", role: "백엔드 개발자" },
+      6: { id: 6, name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀", role: "프론트엔드 개발자" },
+      7: { id: 7, name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀", role: "백엔드 개발자" },
+      8: { id: 8, name: "김태현", avatar: "https://randomuser.me/api/portraits/men/12.jpg", team: "개발팀", role: "데브옵스 엔지니어" },
+      9: { id: 9, name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀", role: "콘텐츠 마케터" },
+      10: { id: 10, name: "임준호", avatar: "https://randomuser.me/api/portraits/men/10.jpg", team: "마케팅팀", role: "퍼포먼스 마케터" },
+      11: { id: 11, name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀", role: "서비스 기획자" },
+      12: { id: 12, name: "최유리", avatar: "https://randomuser.me/api/portraits/women/15.jpg", team: "마케팅팀", role: "그로스 해커" },
+      13: { id: 13, name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀", role: "운영 매니저" },
+      14: { id: 14, name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀", role: "주니어 기획자" },
+      15: { id: 15, name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀", role: "풀스택 개발자" }
+    };
+
+    // 프로젝트별 네트워크 데이터 (ID 기반)
     const projectNetworks = {
       all: {
-        nodes: [
-          // UI/UX 클러스터
-          { id: "user1", name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀" },
-          { id: "user2", name: "이지원", avatar: "https://randomuser.me/api/portraits/women/7.jpg", team: "디자인팀" },
-          { id: "user3", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
-          { id: "user4", name: "오지은", avatar: "https://randomuser.me/api/portraits/women/11.jpg", team: "디자인팀" },
-
-          // 백엔드 클러스터
-          { id: "user5", name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀" },
-          { id: "user6", name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀" },
-          { id: "user7", name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀" },
-          { id: "user8", name: "김태현", avatar: "https://randomuser.me/api/portraits/men/12.jpg", team: "개발팀" },
-
-          // 기획/마케팅 클러스터
-          { id: "user9", name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀" },
-          { id: "user10", name: "임준호", avatar: "https://randomuser.me/api/portraits/men/10.jpg", team: "마케팅팀" },
-          { id: "user11", name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀" },
-          { id: "user12", name: "최유리", avatar: "https://randomuser.me/api/portraits/women/15.jpg", team: "마케팅팀" },
-
-          // 운영/QA 클러스터
-          { id: "user13", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" },
-          { id: "user14", name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀" },
-          { id: "user15", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" }
-        ],
+        name: "전체 프로젝트",
+        nodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
         links: [
-          // UI/UX 클러스터 내부 연결
-          { source: "user1", target: "user2", value: 8 },
-          { source: "user1", target: "user3", value: 7 },
-          { source: "user1", target: "user4", value: 8 },
-          { source: "user2", target: "user3", value: 7 },
-          { source: "user2", target: "user4", value: 8 },
-          { source: "user3", target: "user4", value: 7 },
-
-          // 백엔드 클러스터 내부 연결
-          { source: "user5", target: "user6", value: 8 },
-          { source: "user5", target: "user7", value: 7 },
-          { source: "user5", target: "user8", value: 8 },
-          { source: "user6", target: "user7", value: 8 },
-          { source: "user6", target: "user8", value: 7 },
-          { source: "user7", target: "user8", value: 8 },
-
-          // 기획/마케팅 클러스터 내부 연결
-          { source: "user9", target: "user10", value: 8 },
-          { source: "user9", target: "user11", value: 7 },
-          { source: "user9", target: "user12", value: 8 },
-          { source: "user10", target: "user11", value: 7 },
-          { source: "user10", target: "user12", value: 8 },
-          { source: "user11", target: "user12", value: 7 },
-
-          // 운영/QA 클러스터 내부 연결
-          { source: "user13", target: "user14", value: 8 },
-          { source: "user13", target: "user15", value: 7 },
-          { source: "user14", target: "user15", value: 8 },
-
-          // 클러스터 간 연결 (브릿지)
-          { source: "user1", target: "user5", value: 5 }, // UI/UX - 백엔드
-          { source: "user5", target: "user9", value: 5 }, // 백엔드 - 기획/마케팅
-          { source: "user9", target: "user13", value: 5 }, // 기획/마케팅 - 운영/QA
-          { source: "user13", target: "user1", value: 5 }, // 운영/QA - UI/UX
-
-          // 추가 클러스터 간 약한 연결
-          { source: "user3", target: "user7", value: 4 },
-          { source: "user8", target: "user11", value: 4 },
-          { source: "user4", target: "user15", value: 4 },
-          { source: "user6", target: "user12", value: 4 }
+          { source: 2, target: 4, value: 8 }, { source: 2, target: 3, value: 7 }, { source: 2, target: 1, value: 8 },
+          { source: 4, target: 3, value: 7 }, { source: 4, target: 1, value: 8 }, { source: 3, target: 1, value: 7 },
+          { source: 5, target: 6, value: 8 }, { source: 5, target: 7, value: 7 }, { source: 5, target: 8, value: 8 },
+          { source: 6, target: 7, value: 8 }, { source: 6, target: 8, value: 7 }, { source: 7, target: 8, value: 8 },
+          { source: 9, target: 10, value: 8 }, { source: 9, target: 11, value: 7 }, { source: 9, target: 12, value: 8 },
+          { source: 10, target: 11, value: 7 }, { source: 10, target: 12, value: 8 }, { source: 11, target: 12, value: 7 },
+          { source: 13, target: 14, value: 8 }, { source: 13, target: 15, value: 7 }, { source: 14, target: 15, value: 8 },
+          { source: 2, target: 5, value: 5 }, { source: 5, target: 9, value: 5 }, { source: 9, target: 13, value: 5 },
+          { source: 13, target: 2, value: 5 }, { source: 3, target: 7, value: 4 }, { source: 8, target: 11, value: 4 },
+          { source: 1, target: 15, value: 4 }, { source: 6, target: 12, value: 4 },
+          { source: 1, target: 2, value: 8 }, { source: 1, target: 4, value: 8 }, { source: 1, target: 3, value: 7 }
         ]
       },
       project1: {
-        nodes: [
-          // 리워드 스토어 개편 프로젝트
-          { id: "user1", name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀" },
-          { id: "user2", name: "이지원", avatar: "https://randomuser.me/api/portraits/women/7.jpg", team: "디자인팀" },
-          { id: "user3", name: "오지은", avatar: "https://randomuser.me/api/portraits/women/11.jpg", team: "디자인팀" },
-          { id: "user4", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" },
-          { id: "user5", name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀" },
-          { id: "user6", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
-          { id: "user7", name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀" }
-        ],
+        name: "리워드 스토어 개편",
+        nodes: [1, 2, 4, 15, 7, 3, 14],
         links: [
-          // 디자인팀 내부 연결
-          { source: "user1", target: "user2", value: 8 },
-          { source: "user1", target: "user3", value: 7 },
-          { source: "user2", target: "user3", value: 8 },
-
-          // 개발팀 내부 연결
-          { source: "user4", target: "user5", value: 8 },
-
-          // 기획팀 내부 연결
-          { source: "user6", target: "user7", value: 8 },
-
-          // 팀 간 연결
-          { source: "user1", target: "user4", value: 6 },
-          { source: "user2", target: "user5", value: 6 },
-          { source: "user3", target: "user6", value: 6 },
-          { source: "user4", target: "user6", value: 6 },
-          { source: "user5", target: "user7", value: 6 }
+          { source: 2, target: 4, value: 8 }, { source: 2, target: 1, value: 7 }, { source: 4, target: 1, value: 8 },
+          { source: 15, target: 7, value: 8 }, { source: 3, target: 14, value: 8 },
+          { source: 2, target: 15, value: 6 }, { source: 4, target: 7, value: 6 },
+          { source: 1, target: 3, value: 6 }, { source: 15, target: 3, value: 6 }, { source: 7, target: 14, value: 6 },
+          { source: 1, target: 2, value: 8 }, { source: 1, target: 4, value: 8 }, { source: 1, target: 3, value: 7 }
         ]
       },
       project2: {
-        nodes: [
-          // 모바일 앱 런칭 프로젝트
-          { id: "user1", name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀" },
-          { id: "user2", name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀" },
-          { id: "user3", name: "김태현", avatar: "https://randomuser.me/api/portraits/men/12.jpg", team: "개발팀" },
-          { id: "user4", name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀" },
-          { id: "user5", name: "임준호", avatar: "https://randomuser.me/api/portraits/men/10.jpg", team: "마케팅팀" },
-          { id: "user6", name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀" },
-          { id: "user7", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" },
-          { id: "user8", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" }
-        ],
+        name: "모바일 앱 런칭",
+        nodes: [5, 6, 8, 9, 10, 11, 13, 15],
         links: [
-          // 개발팀 내부 연결
-          { source: "user1", target: "user2", value: 8 },
-          { source: "user1", target: "user3", value: 7 },
-          { source: "user2", target: "user3", value: 8 },
-          { source: "user1", target: "user8", value: 7 },
-          { source: "user2", target: "user8", value: 8 },
-          { source: "user3", target: "user8", value: 7 },
-
-          // 마케팅팀 내부 연결
-          { source: "user4", target: "user5", value: 8 },
-
-          // 팀 간 연결
-          { source: "user1", target: "user6", value: 6 },
-          { source: "user2", target: "user4", value: 6 },
-          { source: "user3", target: "user7", value: 6 },
-          { source: "user4", target: "user6", value: 6 },
-          { source: "user5", target: "user7", value: 6 }
+          { source: 5, target: 6, value: 8 }, { source: 5, target: 8, value: 7 }, { source: 6, target: 8, value: 8 },
+          { source: 5, target: 15, value: 7 }, { source: 6, target: 15, value: 8 }, { source: 8, target: 15, value: 7 },
+          { source: 9, target: 10, value: 8 }, { source: 5, target: 11, value: 6 }, { source: 6, target: 9, value: 6 },
+          { source: 8, target: 13, value: 6 }, { source: 9, target: 11, value: 6 }, { source: 10, target: 13, value: 6 }
         ]
       },
       project3: {
-        nodes: [
-          // 신규 평가 시스템 프로젝트
-          { id: "user1", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
-          { id: "user2", name: "윤서아", avatar: "https://randomuser.me/api/portraits/women/9.jpg", team: "기획팀" },
-          { id: "user3", name: "정태우", avatar: "https://randomuser.me/api/portraits/men/4.jpg", team: "개발팀" },
-          { id: "user4", name: "이상훈", avatar: "https://randomuser.me/api/portraits/men/14.jpg", team: "개발팀" },
-          { id: "user5", name: "최유진", avatar: "https://randomuser.me/api/portraits/women/5.jpg", team: "마케팅팀" },
-          { id: "user6", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" },
-          { id: "user7", name: "박지수", avatar: "https://randomuser.me/api/portraits/women/13.jpg", team: "기획팀" }
-        ],
+        name: "신규 평가 시스템",
+        nodes: [3, 11, 5, 6, 9, 13, 14],
         links: [
-          // 기획팀 내부 연결
-          { source: "user1", target: "user2", value: 8 },
-          { source: "user1", target: "user7", value: 7 },
-          { source: "user2", target: "user7", value: 8 },
-
-          // 개발팀 내부 연결
-          { source: "user3", target: "user4", value: 8 },
-
-          // 팀 간 연결
-          { source: "user1", target: "user3", value: 6 },
-          { source: "user2", target: "user4", value: 6 },
-          { source: "user3", target: "user5", value: 6 },
-          { source: "user4", target: "user6", value: 6 },
-          { source: "user5", target: "user7", value: 6 }
+          { source: 3, target: 11, value: 8 }, { source: 3, target: 14, value: 7 }, { source: 11, target: 14, value: 8 },
+          { source: 5, target: 6, value: 8 }, { source: 3, target: 5, value: 6 }, { source: 11, target: 6, value: 6 },
+          { source: 5, target: 9, value: 6 }, { source: 6, target: 13, value: 6 }, { source: 9, target: 14, value: 6 }
         ]
       },
       project4: {
-        nodes: [
-          // 클랩 보드 개발 프로젝트
-          { id: "user1", name: "이정훈", avatar: "https://randomuser.me/api/portraits/men/1.jpg", team: "개발팀" },
-          { id: "user2", name: "강현우", avatar: "https://randomuser.me/api/portraits/men/8.jpg", team: "개발팀" },
-          { id: "user3", name: "김서연", avatar: "https://randomuser.me/api/portraits/women/2.jpg", team: "디자인팀" },
-          { id: "user4", name: "이지원", avatar: "https://randomuser.me/api/portraits/women/7.jpg", team: "디자인팀" },
-          { id: "user5", name: "박민지", avatar: "https://randomuser.me/api/portraits/women/3.jpg", team: "기획팀" },
-          { id: "user6", name: "최유리", avatar: "https://randomuser.me/api/portraits/women/15.jpg", team: "마케팅팀" },
-          { id: "user7", name: "한승민", avatar: "https://randomuser.me/api/portraits/men/6.jpg", team: "운영팀" }
-        ],
+        name: "클랩 보드 개발",
+        nodes: [15, 7, 2, 4, 3, 12, 13],
         links: [
-          // 개발팀 내부 연결
-          { source: "user1", target: "user2", value: 8 },
-
-          // 디자인팀 내부 연결
-          { source: "user3", target: "user4", value: 8 },
-
-          // 팀 간 연결
-          { source: "user1", target: "user3", value: 6 },
-          { source: "user2", target: "user4", value: 6 },
-          { source: "user3", target: "user5", value: 6 },
-          { source: "user4", target: "user6", value: 6 },
-          { source: "user5", target: "user7", value: 6 }
+          { source: 15, target: 7, value: 8 }, { source: 2, target: 4, value: 8 },
+          { source: 15, target: 2, value: 6 }, { source: 7, target: 4, value: 6 },
+          { source: 2, target: 3, value: 6 }, { source: 4, target: 12, value: 6 }, { source: 3, target: 13, value: 6 }
         ]
       }
     };
 
+    function populateProjectFilter(memberId) {
+      const select = document.querySelector('.network-project-select');
+      select.innerHTML = '';
+
+      const memberIdNum = parseInt(memberId, 10);
+      let firstProject = 'all';
+
+      const memberProjects = Object.keys(projectNetworks).filter(projectId => 
+        projectId !== 'all' && projectNetworks[projectId].nodes.includes(memberIdNum)
+      );
+
+      // '전체 프로젝트' 옵션 추가
+      const allOption = document.createElement('option');
+      allOption.value = 'all';
+      allOption.textContent = projectNetworks.all.name;
+      select.appendChild(allOption);
+
+      // 멤버가 속한 프로젝트들 추가
+      memberProjects.forEach(projectId => {
+        const option = document.createElement('option');
+        option.value = projectId;
+        option.textContent = projectNetworks[projectId].name;
+        select.appendChild(option);
+      });
+      
+      // 기본 선택값을 멤버가 속한 첫 번째 특정 프로젝트로 설정
+      if (memberProjects.length > 0) {
+        firstProject = memberProjects[0];
+      }
+      select.value = firstProject;
+    }
+
     // 네트워크 그래프 초기화 함수 수정
-    function initNetworkGraph(projectId = 'all') {
-      // 기존 SVG 내용 제거
+    function initNetworkGraph(projectId, currentMemberId) {
       d3.select('.network-svg').selectAll('*').remove();
 
-      const { nodes, links } = projectNetworks[projectId];
+      const network = projectNetworks[projectId];
+      if (!network) return;
       
+      const currentMemberIdNum = parseInt(currentMemberId, 10);
+
+      const nodeData = network.nodes.map(id => members[id]);
+      const linkData = network.links.map(l => ({...l}));
+
       const container = document.querySelector('.network-container');
       const width = container.offsetWidth;
       const height = container.offsetHeight;
 
       const svg = d3.select('.network-svg')
         .attr('width', width)
-        .attr('height', height);
-
-      // 줌 기능 추가
-      const zoom = d3.zoom()
-        .scaleExtent([0.5, 2])
-        .on('zoom', (event) => {
-          g.attr('transform', event.transform);
+        .attr('height', height)
+        .on('click', () => { // Hide tooltip when clicking background
+          d3.select('#network-tooltip').style('display', 'none');
+          activeTooltipNode = null;
         });
 
+      const zoom = d3.zoom().scaleExtent([0.5, 2]).on('zoom', (event) => g.attr('transform', event.transform));
       svg.call(zoom);
 
-      // 중앙에 위치할 그룹 생성
-      const g = svg.append('g')
-        .attr('transform', `translate(${width/2},${height/2})`);
+      const g = svg.append('g').attr('transform', `translate(${width/2},${height/2})`);
 
-      // Force simulation 설정
-      const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id).distance(d => 120 - d.value * 5))
+      const simulation = d3.forceSimulation(nodeData)
+        .force('link', d3.forceLink(linkData).id(d => d.id).distance(d => 120 - d.value * 5))
         .force('charge', d3.forceManyBody().strength(-800))
         .force('x', d3.forceX().strength(0.08))
         .force('y', d3.forceY().strength(0.08))
         .force('collision', d3.forceCollide().radius(50));
 
-      // 링크 그리기
-      const link = g.append('g')
-        .selectAll('line')
-        .data(links)
-        .join('line')
-        .attr('class', 'network-link')
-        .attr('stroke-width', d => Math.sqrt(d.value));
+      const link = g.append('g').selectAll('line').data(linkData).join('line')
+        .attr('class', 'network-link').attr('stroke-width', d => Math.sqrt(d.value));
 
-      // 노드 그리기
-      const node = g.append('g')
-        .selectAll('.network-node')
-        .data(nodes)
-        .join('g')
+      const node = g.append('g').selectAll('.network-node').data(nodeData).join('g')
         .attr('class', 'network-node')
-        .call(d3.drag()
-          .on('start', dragstarted)
-          .on('drag', dragged)
-          .on('end', dragended));
+        .call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended))
+        .on('click', handleNodeClick);
 
-      // 노드 원 추가
-      node.append('circle')
-        .attr('r', 24)
-        .attr('fill', '#fff')
+      node.append('circle').attr('r', 24).attr('fill', '#fff')
         .attr('stroke', d => {
+          if (d.id === currentMemberIdNum) return '#f59e0b'; // 현재 사용자 강조 색상
           switch(d.team) {
             case '개발팀': return '#4f8cff';
             case '디자인팀': return '#a3e635';
@@ -1253,69 +1174,62 @@
         })
         .attr('stroke-width', 3);
 
-      // 아바타 이미지 추가
-      node.append('image')
-        .attr('x', -22)
-        .attr('y', -22)
-        .attr('width', 44)
-        .attr('height', 44)
-        .attr('clip-path', 'circle(22px)')
-        .attr('href', d => d.avatar)
-        .attr('preserveAspectRatio', 'xMidYMid slice');
+      node.append('image').attr('x', -22).attr('y', -22).attr('width', 44).attr('height', 44)
+        .attr('clip-path', 'circle(22px)').attr('href', d => d.avatar).attr('preserveAspectRatio', 'xMidYMid slice');
 
-      // 이름 텍스트 추가
-      node.append('text')
-        .attr('dy', 40)
-        .text(d => d.name)
-        .attr('text-anchor', 'middle')
-        .attr('fill', '#666')
-        .attr('font-size', '12px')
-        .attr('font-weight', '500');
+      node.append('text').attr('dy', 40).text(d => d.name).attr('text-anchor', 'middle')
+        .attr('fill', '#666').attr('font-size', '12px').attr('font-weight', '500');
 
-      // Force simulation 업데이트 함수
       simulation.on('tick', () => {
-        link
-          .attr('x1', d => d.source.x)
-          .attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x)
-          .attr('y2', d => d.target.y);
-
+        link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
         node.attr('transform', d => `translate(${d.x},${d.y})`);
       });
 
-      // 드래그 이벤트 핸들러
       function dragstarted(event, d) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
+        d.fx = d.x; d.fy = d.y;
       }
-
-      function dragged(event, d) {
-        d.fx = event.x;
-        d.fy = event.y;
-      }
-
+      function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
       function dragended(event, d) {
         if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
+        d.fx = null; d.fy = null;
       }
 
-      // 초기 위치 설정을 위해 시뮬레이션 실행
       simulation.alpha(1).restart();
     }
 
-    // 프로젝트 선택 이벤트 리스너
+    let activeTooltipNode = null;
+    function handleNodeClick(event, d) {
+        event.stopPropagation();
+        const tooltip = d3.select('#network-tooltip');
+
+        if (activeTooltipNode === this) {
+            tooltip.style('display', 'none');
+            activeTooltipNode = null;
+            return;
+        }
+        
+        activeTooltipNode = this;
+        
+        const container = document.querySelector('.network-container');
+        const [x, y] = d3.pointer(event, container);
+
+        tooltip.html(`<strong>${d.team}</strong> &middot; ${d.role}`)
+            .style('display', 'block')
+            .style('left', `${x + 15}px`)
+            .style('top', `${y}px`);
+    }
+
+    // 프로젝트 선택 이벤트 리스너 수정
     document.querySelector('.network-project-select').addEventListener('change', (e) => {
-      initNetworkGraph(e.target.value);
+      const currentMemberId = document.getElementById('memberModal').dataset.currentMemberId;
+      if(currentMemberId) {
+        initNetworkGraph(e.target.value, currentMemberId);
+      }
     });
 
-    // 네트워크 탭 클릭 시 그래프 초기화
-    document.querySelector('.member-tab[data-tab="network"]').addEventListener('click', () => {
-      setTimeout(() => {
-        initNetworkGraph(document.querySelector('.network-project-select').value);
-      }, 100);
-    });
+    // 네트워크 탭 클릭 시 그래프 초기화 로직은 member-tab click listener 안으로 이동
   </script>
 </body>
 </html>
